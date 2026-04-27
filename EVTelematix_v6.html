@@ -1,0 +1,1888 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Kalkulator wyceny | EVTelematix – Van, Campervan, Ciężarówka</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=IBM+Plex+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --navy:#07131F;--navy2:#0C1E30;--blue:#1A56CC;--blue2:#1344A8;
+  --steel:#2A4A6B;--steel2:#1E3A55;
+  --gold:#C8850A;--gold2:#A86D08;
+  --green:#0F6B30;--gbg:#F0FDF4;--gbr:#A7F3D0;
+  --amber:#924800;--abg:#FFF8F0;--abr:#FCD9A8;
+  --red:#991B1B;--rbg:#FEF2F2;--rbr:#FECACA;
+  --text:#0F172A;--muted:#475569;--light:#F1F5F9;--border:#CBD5E1;--card:#fff;
+  --r:10px;--rs:6px;
+}
+html{scroll-behavior:smooth}
+body{font-family:'IBM Plex Sans',sans-serif;background:#E8EDF3;color:var(--text);min-height:100vh;font-size:14px;line-height:1.5}
+
+/* ── TOPBAR ── */
+.topbar{background:var(--navy);padding:.55rem 1.5rem;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;z-index:200;border-bottom:2px solid var(--steel)}
+.logo{font-family:'Syne',sans-serif;font-weight:800;color:#E2E8F0;font-size:1rem;text-decoration:none;cursor:pointer;letter-spacing:.02em}
+.logo span{color:var(--gold)}
+.topbar-r{display:flex;gap:1.25rem;align-items:center;flex-wrap:wrap}
+.topbar-r a{color:#94A3B8;font-size:.75rem;text-decoration:none;transition:color .15s}
+.topbar-r a:hover{color:#E2E8F0}
+.adm-btn{display:none;background:transparent;border:1px solid rgba(200,133,10,.4);color:var(--gold);border-radius:4px;padding:.26rem .6rem;font-size:.69rem;font-family:'Syne',sans-serif;cursor:pointer}
+.adm-btn.show{display:block}
+
+/* ── HERO ── */
+.hero{background:var(--navy2);padding:1.75rem 1.5rem 1.5rem;border-bottom:2px solid var(--steel)}
+.hero-ey{font-family:'Syne',sans-serif;font-size:.63rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);margin-bottom:.55rem;display:flex;align-items:center;gap:.45rem}
+.hero-ey::before{content:'';display:block;width:20px;height:2px;background:var(--gold)}
+.hero h1{font-family:'Syne',sans-serif;font-size:clamp(1.4rem,3vw,2rem);font-weight:800;color:#E2E8F0;line-height:1.1;margin-bottom:.45rem}
+.hero h1 em{color:var(--gold);font-style:normal}
+.hero-sub{color:#64748B;font-size:.83rem;max-width:480px;line-height:1.6;margin-bottom:1.1rem}
+.hero-stats{display:flex;gap:2rem;flex-wrap:wrap}
+.hstat-v{font-family:'Syne',sans-serif;font-size:1rem;font-weight:700;color:#E2E8F0}
+.hstat-l{font-size:.65rem;color:#64748B;text-transform:uppercase;letter-spacing:.06em}
+
+/* ── PROGRESS ── */
+.prog-wrap{background:var(--navy);border-bottom:1px solid var(--steel);padding:.6rem 1.5rem;overflow-x:auto}
+.prog{display:flex;align-items:center;gap:0;min-width:max-content}
+.ps{display:flex;align-items:center;gap:.32rem}
+.ps-n{width:20px;height:20px;border-radius:50%;border:1.5px solid #334155;background:transparent;color:#475569;font-size:.62rem;font-family:'Syne',sans-serif;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .25s}
+.ps-l{font-size:.7rem;color:#475569;white-space:nowrap;transition:color .25s}
+.ps.done .ps-n{background:var(--green);border-color:var(--green);color:#fff}
+.ps.active .ps-n{background:var(--blue);border-color:var(--blue);color:#fff}
+.ps.active .ps-l{color:#94A3B8;font-weight:500}
+.ps-arr{color:#1E293B;font-size:.65rem;padding:0 .28rem}
+
+/* ── LAYOUT ── */
+.main{max-width:1080px;margin:0 auto;padding:1.2rem 1rem 4rem;display:grid;grid-template-columns:1fr 296px;gap:1.1rem;align-items:start}
+@media(max-width:840px){.main{grid-template-columns:1fr;padding:1rem .75rem 3rem}}
+.step{display:none}.step.active{display:block}
+.sp{padding:1.1rem}
+
+/* ── SECTION TITLE ── */
+.stitle{font-family:'Syne',sans-serif;font-size:.93rem;font-weight:700;color:var(--navy);margin-bottom:.22rem;display:flex;align-items:center;gap:.45rem}
+.stitle::before{content:'';display:block;width:3px;height:15px;background:var(--blue);border-radius:2px;flex-shrink:0}
+.ssub{font-size:.78rem;color:var(--muted);margin-bottom:1.1rem;line-height:1.5;padding-left:.75rem}
+
+/* ── CARDS ── */
+.card{background:var(--card);border:1px solid var(--border);border-radius:var(--r);overflow:hidden}
+
+/* ── PACKAGE GRID ── */
+.pkg-grid{display:grid;grid-template-columns:1fr 1fr;gap:.6rem}
+@media(max-width:540px){.pkg-grid{grid-template-columns:1fr}}
+.pkg{border:1.5px solid var(--border);border-radius:var(--r);background:var(--card);cursor:pointer;transition:all .18s;overflow:hidden}
+.pkg:hover{border-color:var(--steel);box-shadow:0 2px 8px rgba(0,0,0,.07)}
+.pkg.sel{border-color:var(--blue);box-shadow:0 0 0 2px rgba(26,86,204,.1)}
+.pkg-top{padding:.75rem .9rem .5rem;display:flex;justify-content:space-between;align-items:flex-start}
+.pkg-icon{width:30px;height:30px;border-radius:var(--rs);background:var(--light);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.pkg-icon svg{width:16px;height:16px;stroke:var(--steel);fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.pkg-chk{width:18px;height:18px;border-radius:50%;border:1.5px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:.55rem;color:#fff;transition:all .18s;flex-shrink:0}
+.pkg.sel .pkg-chk{background:var(--blue);border-color:var(--blue)}
+.pkg-name{font-family:'Syne',sans-serif;font-weight:700;font-size:.86rem;color:var(--navy);padding:0 .9rem .18rem}
+.pkg-desc{font-size:.71rem;color:var(--muted);line-height:1.45;padding:0 .9rem .55rem}
+.pkg-foot{border-top:1px solid var(--border);padding:.42rem .9rem;background:var(--light);display:flex;justify-content:space-between;align-items:center}
+.ptag{font-size:.57rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;padding:.1rem .36rem;border-radius:3px;border:1px solid}
+.t-blue{background:#EEF4FF;color:var(--blue);border-color:#BFDBFE}
+.t-green{background:var(--gbg);color:var(--green);border-color:var(--gbr)}
+.t-gold{background:#FFF8E7;color:var(--gold);border-color:#FDE68A}
+.pkg-price{font-family:'Syne',sans-serif;font-weight:700;font-size:.78rem;color:var(--blue)}
+
+/* ── FORM ── */
+.fgrid{display:grid;grid-template-columns:1fr 1fr;gap:.52rem}
+.fgrid3{display:grid;grid-template-columns:2fr 1fr 1fr;gap:.52rem}
+@media(max-width:500px){.fgrid,.fgrid3{grid-template-columns:1fr}}
+.fg{display:flex;flex-direction:column;gap:.2rem}
+.fg label{font-size:.71rem;font-weight:500;color:var(--text)}
+.fg .opt{font-size:.65rem;color:var(--muted);font-weight:400}
+.fg input,.fg select,.fg textarea{border:1.5px solid var(--border);border-radius:var(--rs);padding:.5rem .68rem;font-size:.81rem;font-family:'IBM Plex Sans',sans-serif;color:var(--text);background:#fff;transition:border-color .15s;width:100%}
+.fg input:focus,.fg select:focus,.fg textarea:focus{outline:none;border-color:var(--blue)}
+.fg input::placeholder{color:#94A3B8;font-size:.78rem}
+
+/* ── CONF SECTIONS ── */
+.conf-sec{background:var(--card);border:1px solid var(--border);border-radius:var(--r);margin-bottom:.6rem;overflow:hidden}
+.conf-hd{display:flex;align-items:center;gap:.58rem;padding:.75rem .9rem;cursor:pointer;transition:background .15s;user-select:none}
+.conf-hd:hover{background:var(--light)}
+.conf-hd.is-open{background:var(--light);border-bottom:1px solid var(--border)}
+.conf-hd-ico{width:28px;height:28px;border-radius:var(--rs);background:var(--navy2);border:1px solid var(--steel);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.conf-hd-ico svg{width:14px;height:14px;stroke:#94A3B8;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.conf-info{flex:1}
+.conf-title{font-family:'Syne',sans-serif;font-weight:700;font-size:.82rem;color:var(--navy);display:flex;align-items:center;gap:.32rem;flex-wrap:wrap}
+.conf-sub{font-size:.68rem;color:var(--muted);margin-top:.04rem}
+.conf-chev{color:var(--muted);font-size:.6rem;transition:transform .2s;flex-shrink:0;margin-left:auto}
+.conf-chev.open{transform:rotate(180deg)}
+.conf-bd{display:none;padding:.85rem .9rem}
+
+/* ── OPTION CARDS ── */
+.og{display:grid;gap:.38rem;margin-bottom:.58rem}
+.og2{grid-template-columns:1fr 1fr}
+@media(max-width:480px){.og2{grid-template-columns:1fr}}
+.oc{border:1.5px solid var(--border);border-radius:var(--rs);background:var(--card);cursor:pointer;transition:all .13s}
+.oc:hover{border-color:var(--steel);background:#F8FAFC}
+.oc.on{border-color:var(--blue);background:#EEF4FF}
+.oc.req{border-color:var(--abr);background:var(--abg);cursor:default}
+.oi{display:flex;align-items:flex-start;gap:.55rem;padding:.6rem .78rem}
+.ochk{width:16px;height:16px;border-radius:3px;border:1.5px solid var(--border);flex-shrink:0;margin-top:.1rem;display:flex;align-items:center;justify-content:center;font-size:.55rem;color:#fff;transition:all .13s}
+.oc.on .ochk{background:var(--blue);border-color:var(--blue)}
+.oc.req .ochk{background:var(--amber);border-color:var(--amber)}
+.oico{width:20px;flex-shrink:0;margin-top:.05rem;display:flex;align-items:center;justify-content:center}
+.oico svg{width:14px;height:14px;stroke:var(--steel);fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.obdy{flex:1;min-width:0}
+.oname{font-weight:500;font-size:.8rem;color:var(--text);display:flex;align-items:center;gap:.28rem;flex-wrap:wrap;line-height:1.3}
+.odesc{font-size:.68rem;color:var(--muted);margin-top:.17rem;line-height:1.42}
+.otip{font-size:.65rem;margin-top:.17rem;line-height:1.4}
+.otip.g{color:var(--green)}.otip.w{color:var(--amber)}.otip.r{color:var(--red)}
+.opr-col{flex-shrink:0;text-align:right;min-width:58px}
+.opr{font-weight:700;font-size:.82rem;color:var(--green);white-space:nowrap}
+.opr.inc{color:var(--muted);font-size:.7rem;font-weight:400}
+.opr.ask{color:var(--amber);font-size:.72rem;font-style:italic}
+.oio{font-size:.58rem;color:#94A3B8;background:var(--light);padding:.08rem .26rem;border-radius:2px;margin-top:.1rem}
+
+/* ── RADIO ── */
+.rc{border:1.5px solid var(--border);border-radius:var(--rs);background:var(--card);cursor:pointer;transition:all .13s;margin-bottom:.36rem}
+.rc:hover{border-color:var(--steel)}
+.rc.on{border-color:var(--blue);background:#EEF4FF}
+.ri{display:flex;align-items:flex-start;gap:.55rem;padding:.6rem .78rem}
+.rdot{width:16px;height:16px;border-radius:50%;border:1.5px solid var(--border);flex-shrink:0;margin-top:.1rem;display:flex;align-items:center;justify-content:center;transition:all .13s}
+.rdot::after{content:'';width:6px;height:6px;border-radius:50%;background:transparent;transition:background .13s}
+.rc.on .rdot{border-color:var(--blue)}.rc.on .rdot::after{background:var(--blue)}
+
+/* ── QTY ── */
+.qrow{display:flex;align-items:center;gap:.42rem;margin-top:.3rem}
+.qb{width:22px;height:22px;border-radius:50%;border:1.5px solid var(--border);background:#fff;color:var(--text);font-size:.85rem;cursor:pointer;display:flex;align-items:center;justify-content:center;line-height:1;transition:all .13s}
+.qb:hover{border-color:var(--blue);color:var(--blue)}
+.qn{font-weight:700;font-size:.85rem;min-width:18px;text-align:center}
+.ql{font-size:.65rem;color:var(--muted)}
+
+/* ── ALERT ── */
+.al{border-radius:var(--rs);padding:.48rem .72rem;font-size:.72rem;margin-bottom:.58rem;display:flex;gap:.36rem;line-height:1.5}
+.al.info{background:#EEF4FF;border-left:2px solid var(--blue);color:#1E3A8A}
+.al.ok{background:var(--gbg);border-left:2px solid var(--green);color:var(--green)}
+.al.warn{background:var(--abg);border-left:2px solid var(--amber);color:var(--amber)}
+.al.tech{background:#F0F6FF;border-left:2px solid var(--steel);color:var(--steel)}
+
+/* ── GPS FEATURE TABLE ── */
+.gps-table-wrap{overflow-x:auto;margin:.6rem 0}
+.gps-table{width:100%;border-collapse:collapse;font-size:.69rem}
+.gps-table th{padding:.45rem .6rem;text-align:center;font-family:'Syne',sans-serif;font-weight:700;font-size:.65rem;text-transform:uppercase;letter-spacing:.06em;border-bottom:2px solid var(--border);white-space:nowrap}
+.gps-table th:first-child{text-align:left;color:var(--muted)}
+.gps-table th.h-basic{background:#EEF4FF;color:var(--blue)}
+.gps-table th.h-pro{background:var(--navy2);color:#E2E8F0}
+.gps-table th.h-promax{background:#1A1200;color:var(--gold)}
+.gps-table td{padding:.4rem .6rem;border-bottom:.5px solid var(--light);vertical-align:middle}
+.gps-table td:first-child{color:var(--text)}
+.gps-table td:not(:first-child){text-align:center}
+.gps-table tr:last-child td{border-bottom:none}
+.gps-table tr:nth-child(even) td{background:#F8FAFC}
+.ck{color:var(--green);font-size:.78rem;font-weight:700}
+.cx{color:#CBD5E1;font-size:.68rem}
+.cp{color:var(--amber);font-size:.68rem}
+
+/* ── TIER SELECT ── */
+.tier-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:.45rem;margin-bottom:.65rem}
+@media(max-width:480px){.tier-grid{grid-template-columns:1fr}}
+.tier-card{border:1.5px solid var(--border);border-radius:var(--rs);background:var(--card);cursor:pointer;transition:all .15s;overflow:hidden}
+.tier-card:hover{border-color:var(--steel)}
+.tier-card.sel{border-color:var(--blue)}
+.tier-hd{padding:.55rem .7rem .38rem}
+.tier-name{font-family:'Syne',sans-serif;font-weight:700;font-size:.8rem;color:var(--navy);margin-bottom:.12rem}
+.tier-desc{font-size:.66rem;color:var(--muted);line-height:1.38}
+.tier-price{padding:.36rem .7rem;font-family:'Syne',sans-serif;font-weight:700;font-size:.75rem;color:var(--blue);background:var(--light);border-top:1px solid var(--border)}
+
+/* ── BILLING TOGGLE ── */
+.billing-toggle{display:flex;align-items:center;gap:.6rem;margin-bottom:.65rem;background:var(--light);border:1px solid var(--border);border-radius:var(--rs);padding:.5rem .75rem}
+.bt-label{font-size:.75rem;color:var(--muted)}
+.bt-switch{display:flex;border:1.5px solid var(--border);border-radius:var(--rs);overflow:hidden;background:#fff}
+.bt-opt{padding:.32rem .7rem;font-size:.72rem;font-family:'Syne',sans-serif;font-weight:600;cursor:pointer;transition:all .15s;color:var(--muted)}
+.bt-opt.active{background:var(--blue);color:#fff}
+.bt-note{font-size:.68rem;color:var(--green);font-weight:500}
+
+/* ── INSTALL ── */
+.inst-grid{display:grid;grid-template-columns:1fr 1fr;gap:.55rem;margin-bottom:.6rem}
+@media(max-width:480px){.inst-grid{grid-template-columns:1fr}}
+.inst-card{border:1.5px solid var(--border);border-radius:var(--r);padding:.85rem;cursor:pointer;transition:all .18s}
+.inst-card:hover{border-color:var(--steel)}
+.inst-card.on{border-color:var(--blue);background:#EEF4FF}
+.inst-ico{margin-bottom:.3rem}
+.inst-ico svg{width:20px;height:20px;stroke:var(--steel);fill:none;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+.inst-name{font-family:'Syne',sans-serif;font-weight:700;font-size:.82rem;color:var(--navy);margin-bottom:.15rem}
+.inst-desc{font-size:.69rem;color:var(--muted);line-height:1.38}
+.mob-calc{background:var(--light);border:1px solid var(--border);border-radius:var(--rs);padding:.75rem;margin-top:.45rem}
+.km-row{display:flex;align-items:center;gap:.55rem;margin-top:.5rem;flex-wrap:wrap}
+.km-row label{font-size:.74rem;color:var(--text);white-space:nowrap}
+.km-inp{width:88px;border:1.5px solid var(--border);border-radius:var(--rs);padding:.38rem .55rem;font-size:.82rem;text-align:center}
+.km-inp:focus{outline:none;border-color:var(--blue)}
+.km-res{font-size:.73rem;color:var(--green);font-weight:500}
+
+/* ── BTNS ── */
+.btn{border:none;border-radius:var(--rs);font-family:'Syne',sans-serif;font-weight:700;cursor:pointer;transition:all .18s;display:inline-flex;align-items:center;justify-content:center;gap:.36rem}
+.btn-prim{background:var(--blue);color:#fff;padding:.75rem 1.35rem;font-size:.84rem}
+.btn-prim:hover{background:var(--blue2)}
+.btn-prim.full{width:100%;margin-bottom:.36rem}
+.btn-sec{background:#fff;color:var(--navy);border:1.5px solid var(--border);padding:.7rem 1.35rem;font-size:.8rem}
+.btn-sec:hover{background:var(--light)}
+.btn-sec.full{width:100%;margin-bottom:.36rem}
+.btn-nav{background:#fff;color:var(--text);border:1.5px solid var(--border);padding:.56rem .95rem;font-size:.78rem}
+.btn-nav:hover{border-color:var(--blue);color:var(--blue)}
+.btn-gold{background:var(--gold);color:#fff;padding:.75rem 1.35rem;font-size:.84rem}
+.btn-gold:hover{background:var(--gold2)}
+.btn-gold.full{width:100%;margin-bottom:.36rem}
+.btn-reset{background:transparent;border:1px solid var(--border);color:var(--muted);border-radius:var(--rs);padding:.4rem .7rem;font-size:.69rem;cursor:pointer;width:100%;transition:all .15s;font-family:'IBM Plex Sans',sans-serif;margin-top:.3rem}
+.btn-reset:hover{border-color:var(--red);color:var(--red)}
+.nav-row{display:flex;gap:.45rem;justify-content:space-between;margin-top:.85rem}
+
+/* ── DIVIDER ── */
+.dv{font-size:.62rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);display:flex;align-items:center;gap:.42rem;margin:.62rem 0 .4rem}
+.dv::before,.dv::after{content:'';flex:1;height:1px;background:var(--border)}
+
+/* ── TAGS ── */
+.tag{display:inline-block;font-size:.57rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;padding:.1rem .36rem;border-radius:3px}
+.tag-r{background:var(--gbg);color:var(--green);border:1px solid var(--gbr)}
+.tag-b{background:#EEF4FF;color:var(--blue);border:1px solid #BFDBFE}
+.tag-g{background:#FFF8E7;color:var(--gold);border:1px solid #FDE68A}
+.tag-n{background:#FDF4FF;color:#7C3AED;border:1px solid #E9D5FF}
+
+/* ── CART / SIDEBAR ── */
+.sidebar{position:sticky;top:62px}
+.cart-box{background:var(--card);border:1px solid var(--border);border-radius:var(--r);overflow:hidden}
+.cart-hd{background:var(--navy2);padding:.72rem .9rem;display:flex;align-items:center;justify-content:space-between;border-bottom:2px solid var(--steel)}
+.cart-title{font-family:'Syne',sans-serif;font-weight:700;color:#E2E8F0;font-size:.8rem;letter-spacing:.02em}
+.cart-cnt{background:rgba(200,133,10,.15);color:var(--gold);border:1px solid rgba(200,133,10,.3);border-radius:20px;padding:.1rem .42rem;font-size:.64rem;font-weight:700;font-family:'Syne',sans-serif}
+.cart-bd{padding:.82rem}
+.cart-empty{text-align:center;padding:1.2rem .5rem;color:var(--muted);font-size:.78rem}
+.cst{font-size:.59rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin:.48rem 0 .26rem;padding-top:.46rem;border-top:1px solid var(--border)}
+.cst:first-child{border-top:none;margin-top:0;padding-top:0}
+.cl{display:flex;justify-content:space-between;align-items:flex-start;gap:.3rem;padding:.19rem 0;border-bottom:.5px solid var(--light);font-size:.71rem}
+.cl:last-child{border-bottom:none}
+.cln{color:var(--text);line-height:1.3;flex:1}
+.cln.muted{color:var(--muted);font-size:.68rem}
+.clp{color:var(--text);font-weight:500;white-space:nowrap}
+.cart-div{height:1px;background:var(--border);margin:.48rem 0}
+.csub{display:flex;justify-content:space-between;font-size:.71rem;margin-bottom:.19rem;color:var(--muted)}
+.ctbox{background:var(--navy2);border-radius:var(--rs);padding:.68rem .82rem;margin:.48rem 0;display:flex;justify-content:space-between;align-items:center;border:1px solid var(--steel)}
+.ctlabel{color:#64748B;font-size:.61rem;text-transform:uppercase;letter-spacing:.05em;font-family:'Syne',sans-serif}
+.ctprice{font-family:'Syne',sans-serif;font-size:1.2rem;font-weight:800;color:var(--gold)}
+.ctpsub{font-size:.6rem;color:#475569;margin-top:.1rem}
+.netto-note{font-size:.62rem;color:var(--muted);text-align:center;margin-top:.25rem}
+.disc-note{background:var(--gbg);border:1px solid var(--gbr);border-radius:var(--rs);padding:.4rem .6rem;font-size:.66rem;color:var(--green);line-height:1.45;border-left:2px solid var(--green);margin-top:.4rem}
+
+/* ── SUMMARY ── */
+.sum-hero{background:var(--navy2);border-radius:var(--r);padding:1rem 1.1rem;margin-bottom:.6rem;text-align:center;border:1px solid var(--steel)}
+.sh-label{color:#64748B;font-size:.66rem;font-family:'Syne',sans-serif;text-transform:uppercase;letter-spacing:.08em;margin-bottom:.25rem}
+.sh-total{font-family:'Syne',sans-serif;font-size:1.9rem;font-weight:800;color:var(--gold)}
+.sh-sub{color:#475569;font-size:.7rem;margin-top:.15rem}
+.sum-sec{background:var(--card);border:1px solid var(--border);border-radius:var(--rs);padding:.82rem;margin-bottom:.52rem}
+.sum-sec-title{font-size:.62rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin-bottom:.48rem;display:flex;align-items:center;gap:.28rem}
+.sum-sec-title::before{content:'';display:block;width:2px;height:9px;background:var(--blue);border-radius:1px}
+.sum-line{display:flex;justify-content:space-between;align-items:flex-start;padding:.22rem 0;border-bottom:.5px solid var(--light);font-size:.76rem;gap:.42rem}
+.sum-line:last-child{border-bottom:none}
+.sum-name{color:var(--text);flex:1;line-height:1.3}
+.sum-price{color:var(--text);font-weight:500;white-space:nowrap;text-align:right}
+.sum-muted{color:var(--muted);font-size:.68rem}
+.sav-box{background:var(--gbg);border:1px solid var(--gbr);border-radius:var(--rs);padding:.82rem;margin-bottom:.52rem;text-align:center}
+.sav-v{font-family:'Syne',sans-serif;font-size:1.1rem;font-weight:800;color:var(--green)}
+.sav-note{font-size:.65rem;color:var(--muted);margin-top:.22rem;line-height:1.45}
+
+/* ── ADMIN ── */
+.adm-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:1000;overflow-y:auto}
+.adm-overlay.show{display:flex;align-items:flex-start;justify-content:center;padding:1.25rem .75rem}
+.adm-panel{background:#fff;border-radius:var(--r);width:100%;max-width:1000px;overflow:hidden}
+.adm-hdr{background:var(--navy2);padding:.85rem 1.1rem;display:flex;justify-content:space-between;align-items:center;border-bottom:2px solid var(--steel)}
+.adm-title{font-family:'Syne',sans-serif;font-weight:700;color:#E2E8F0;font-size:.88rem}
+.adm-close{background:none;border:none;color:#475569;cursor:pointer;font-size:1.1rem;transition:color .15s}
+.adm-close:hover{color:#E2E8F0}
+.adm-bd{padding:1.1rem;overflow-x:auto}
+.adm-sec{font-family:'Syne',sans-serif;font-weight:700;font-size:.82rem;color:var(--navy);margin-bottom:.62rem;margin-top:.95rem;padding-bottom:.32rem;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:.4rem}
+.adm-sec:first-child{margin-top:0}
+.ptable{width:100%;border-collapse:collapse;font-size:.74rem;margin-bottom:.5rem}
+.ptable th{background:var(--light);padding:.46rem .62rem;text-align:left;font-size:.63rem;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);font-weight:600;border-bottom:1px solid var(--border);white-space:nowrap}
+.ptable td{padding:.36rem .62rem;border-bottom:.5px solid var(--light);vertical-align:middle}
+.ptable tr:last-child td{border-bottom:none}
+.ptable tr.in-calc{background:#EEF4FF!important}
+.ptable tr.in-calc td:first-child{color:var(--blue);font-weight:600}
+.pinput{border:1.5px solid var(--border);border-radius:var(--rs);padding:.28rem .48rem;font-size:.78rem;width:82px;text-align:center}
+.pinput:focus{outline:none;border-color:var(--blue)}
+.margin-val{font-size:.72rem;font-weight:600;font-variant-numeric:tabular-nums}
+.adm-actions{display:flex;gap:.42rem;flex-wrap:wrap;margin-top:.9rem;padding-top:.7rem;border-top:1px solid var(--border)}
+.adm-save{background:var(--blue);color:#fff;border:none;border-radius:var(--rs);padding:.52rem 1.05rem;font-size:.77rem;font-family:'Syne',sans-serif;font-weight:700;cursor:pointer}
+.adm-reset{background:#fff;color:var(--red);border:1.5px solid var(--rbr);border-radius:var(--rs);padding:.52rem 1.05rem;font-size:.77rem;font-family:'Syne',sans-serif;font-weight:700;cursor:pointer}
+.login-form{display:flex;flex-direction:column;gap:.62rem;max-width:260px;margin:1.25rem auto}
+.login-form input{border:1.5px solid var(--border);border-radius:var(--rs);padding:.58rem .82rem;font-size:.84rem}
+.login-form input:focus{outline:none;border-color:var(--blue)}
+.login-err{color:var(--red);font-size:.73rem;text-align:center}
+
+/* ── FOOTER ── */
+footer{text-align:center;padding:1.1rem;color:var(--muted);font-size:.7rem;line-height:1.7}
+footer a{color:var(--blue);text-decoration:none}
+
+/* ── HIDDEN ── */
+.hidden{display:none!important}
+
+/* ── PRINT ── */
+.print-hdr{display:none}
+@media print{
+  *{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}
+  .topbar,.prog-wrap,.nav-row,.btn-nav,.btn-prim,.btn-sec,.btn-gold,.btn-reset,.adm-overlay,.step:not(.active),footer,.add-veh,.inst-grid,#mob-calc,.conf-hd .conf-chev{display:none!important}
+  body{background:#fff!important;font-size:11pt;color:#000;margin:0}
+  .main{display:block!important;padding:0!important;max-width:100%!important}
+  .hero{background:#07131F!important;padding:.85rem 1.25rem!important}
+  .hero-sub,.hero-stats{display:none}
+  .hero h1{font-size:1.2rem!important}
+  .sidebar{position:static!important;width:100%!important;margin-top:.75rem}
+  .cart-box,.cart-hd,.ctbox{break-inside:avoid}
+  .cart-hd{background:#07131F!important}
+  .ctbox{background:#07131F!important;border:1px solid #2A4A6B!important}
+  .sum-hero{background:#07131F!important;break-inside:avoid}
+  .sum-sec,.sav-box,.conf-sec{break-inside:avoid}
+  .conf-bd{display:block!important}
+  .conf-hd.is-open{border-bottom:1px solid #CBD5E1!important}
+  .print-hdr{display:flex!important;justify-content:space-between;align-items:center;border-bottom:2px solid #07131F;padding-bottom:.4rem;margin-bottom:.75rem}
+  @page{size:A4 portrait;margin:14mm 14mm 14mm 14mm}
+}
+</style>
+</head>
+<body>
+
+<!-- PRINT HEADER -->
+<div class="print-hdr">
+  <div style="font-family:'Syne',sans-serif;font-weight:800;font-size:1rem;color:#07131F">EV<span style="color:#C8850A">Telematix</span></div>
+  <div style="font-size:.75rem;color:#475569">+48 516 956 809 · info@evtelematix.com · evtelematix.pl</div>
+</div>
+
+<!-- TOPBAR -->
+<div class="topbar">
+  <a href="https://evtelematix.pl" class="logo" target="_blank">EV<span>Telematix</span></a>
+  <div class="topbar-r">
+    <a href="https://evtelematix.pl" target="_blank">evtelematix.pl</a>
+    <a href="tel:+48516956809">+48 516 956 809</a>
+    <a href="mailto:info@evtelematix.com">info@evtelematix.com</a>
+    <button class="adm-btn" id="adm-trigger" onclick="openAdmin()">Panel admin</button>
+  </div>
+</div>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-ey">System wyceny online</div>
+  <h1>Profesjonalne zabezpieczenia<br><em>vanów i kamperów</em></h1>
+  <p class="hero-sub">Skonfiguruj system dopasowany do Twojego pojazdu. Instalacja w warsztacie lub dojazd do klienta – cała Polska.</p>
+  <div class="hero-stats">
+    <div class="hstat"><div class="hstat-v">do 30%</div><div class="hstat-l">Zniżka OC/AC*</div></div>
+    <div class="hstat"><div class="hstat-v">4G LTE</div><div class="hstat-l">Łączność</div></div>
+    <div class="hstat"><div class="hstat-v">24/7</div><div class="hstat-l">Monitoring GPS</div></div>
+    <div class="hstat"><div class="hstat-v">Gwarancja</div><div class="hstat-l">Sprzęt i montaż</div></div>
+  </div>
+</div>
+
+<!-- PROGRESS -->
+<div class="prog-wrap">
+  <div class="prog" id="prog">
+    <div class="ps active" id="ps0"><span class="ps-n">1</span><span class="ps-l">Dane klienta</span></div>
+    <span class="ps-arr">›</span>
+    <div class="ps" id="ps1"><span class="ps-n">2</span><span class="ps-l">Pakiety</span></div>
+    <span class="ps-arr">›</span>
+    <div class="ps" id="ps2"><span class="ps-n">3</span><span class="ps-l">Konfiguracja</span></div>
+    <span class="ps-arr">›</span>
+    <div class="ps" id="ps3"><span class="ps-n">4</span><span class="ps-l">Instalacja</span></div>
+    <span class="ps-arr">›</span>
+    <div class="ps" id="ps4"><span class="ps-n">5</span><span class="ps-l">Wycena</span></div>
+  </div>
+</div>
+
+<div class="main">
+<div>
+
+<!-- ════════ STEP 0 – DANE KLIENTA ════════ -->
+<div class="step active" id="step-0">
+  <div class="sp">
+    <div class="stitle">Dane klienta i pojazdu</div>
+    <p class="ssub">Wypełnij dane kontaktowe. Wycena bezpłatna, bez zobowiązań.</p>
+
+    <div class="card sp" style="margin-bottom:.75rem">
+      <div class="dv" style="margin-top:0">Ile pojazdów do zabezpieczenia?</div>
+      <div style="display:flex;align-items:center;gap:.65rem;margin-bottom:.42rem">
+        <button onclick="adjVC(-1)" class="qb" style="width:26px;height:26px">−</button>
+        <input type="number" id="vc-input" min="1" max="999" value="1"
+          oninput="setVC(+this.value||1)"
+          style="width:72px;border:2px solid var(--blue);border-radius:var(--rs);padding:.38rem .48rem;font-size:1rem;font-weight:700;text-align:center;color:var(--navy);font-family:'Syne',sans-serif">
+        <button onclick="adjVC(1)" class="qb" style="width:26px;height:26px">+</button>
+        <span style="font-size:.72rem;color:var(--muted)">szt. (max 999)</span>
+      </div>
+      <div style="font-size:.68rem;color:var(--muted)">Przy flocie 5+ pojazdów – możliwy rabat pakietowy. Wycena przygotowywana per pojazd.</div>
+    </div>
+
+    <div class="card sp">
+      <div class="dv" style="margin-top:0">Dane kontaktowe</div>
+      <div class="fgrid">
+        <div class="fg"><label>Imię <span style="color:var(--red)">*</span></label><input type="text" id="l-fname" placeholder="Jan"></div>
+        <div class="fg"><label>Nazwisko <span style="color:var(--red)">*</span></label><input type="text" id="l-lname" placeholder="Kowalski"></div>
+      </div>
+      <div class="fgrid" style="margin-top:.48rem">
+        <div class="fg"><label>Telefon <span style="color:var(--red)">*</span></label><input type="tel" id="l-phone" placeholder="+48 600 000 000"></div>
+        <div class="fg"><label>E-mail <span style="color:var(--red)">*</span></label><input type="email" id="l-email" placeholder="jan@firma.pl"></div>
+      </div>
+      <div class="fgrid" style="margin-top:.48rem">
+        <div class="fg"><label>Firma <span class="opt">(opcjonalne)</span></label><input type="text" id="l-company" placeholder="Nazwa firmy"></div>
+        <div class="fg"><label>Miejscowość <span style="color:var(--red)">*</span></label><input type="text" id="l-city" placeholder="np. Warszawa, Kraków"></div>
+      </div>
+      <div class="fgrid" style="margin-top:.48rem">
+        <div class="fg"><label>NIP <span class="opt">(opcjonalne)</span></label><input type="text" id="l-nip" placeholder="1234567890"></div>
+        <div class="fg"><label>Skąd o nas wiesz?</label>
+          <select id="l-source">
+            <option value="">Wybierz...</option>
+            <option value="google">Google</option>
+            <option value="facebook">Facebook / Instagram</option>
+            <option value="recommend">Polecenie</option>
+            <option value="forum">Forum / grupa online</option>
+            <option value="other">Inne</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <div class="al warn hidden" id="lead-err" style="margin-top:.6rem"><span>⚠</span> Uzupełnij wymagane pola: imię, nazwisko, telefon, e-mail, miejscowość i liczbę pojazdów.</div>
+    <div style="display:flex;justify-content:flex-end;margin-top:.85rem">
+      <button class="btn btn-prim" onclick="gotoStep(1)">Dalej – wybór pakietów →</button>
+    </div>
+  </div>
+</div>
+
+<!-- ════════ STEP 1 – PAKIETY ════════ -->
+<div class="step" id="step-1">
+  <div class="sp">
+    <div class="stitle">Wybierz zakres zabezpieczeń</div>
+    <p class="ssub">Zaznacz co Cię interesuje – jeden lub kilka pakietów. Szczegóły konfigurujesz w kolejnym kroku. <strong>Cena pojawia się po konfiguracji.</strong></p>
+    <div class="pkg-grid">
+
+      <div class="pkg" data-pkg="gps" onclick="togglePkg('gps',this)">
+        <div class="pkg-top">
+          <div class="pkg-icon">
+            <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 2a7 7 0 0 1 7 7c0 5.25-7 13-7 13S5 14.25 5 9a7 7 0 0 1 7-7z"/></svg>
+          </div>
+          <div class="pkg-chk" id="psel-gps"></div>
+        </div>
+        <div class="pkg-name">Lokalizator GPS</div>
+        <div class="pkg-desc">Pozycja 24/7, historia tras, powiadomienia, geofencing, odczyt CAN, platforma EVTelematix. Trzy warianty: Basic / Pro / Pro Max.</div>
+        <div class="pkg-foot"><span class="ptag t-blue">Telematyka · 4G LTE</span><span class="pkg-price">od <span id="pkgp-gps">980</span> zł</span></div>
+      </div>
+
+      <div class="pkg" data-pkg="immo" onclick="togglePkg('immo',this)">
+        <div class="pkg-top">
+          <div class="pkg-icon">
+            <svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+          </div>
+          <div class="pkg-chk" id="psel-immo"></div>
+        </div>
+        <div class="pkg-name">Immobilizer</div>
+        <div class="pkg-desc">Cyfrowe odcięcie zapłonu. CAN (bez cięcia przewodów) lub analogowy przekaźnik. Zdalna blokada. Nie wymaga GPS.</div>
+        <div class="pkg-foot"><span class="ptag t-green">Ochrona silnika</span><span class="pkg-price">od <span id="pkgp-immo">390</span> zł</span></div>
+      </div>
+
+      <div class="pkg" data-pkg="alarm" onclick="togglePkg('alarm',this)">
+        <div class="pkg-top">
+          <div class="pkg-icon">
+            <svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+          </div>
+          <div class="pkg-chk" id="psel-alarm"></div>
+        </div>
+        <div class="pkg-name">Alarm + Czujniki</div>
+        <div class="pkg-desc">Alarm CAN sterowany pilotem fabrycznym, kontaktrony, PIR, czujnik gazu, zbicia szyby, syreny, push/SMS.</div>
+        <div class="pkg-foot"><span class="ptag t-green">Ochrona pojazdu</span><span class="pkg-price">od <span id="pkgp-alarm">1 799</span> zł</span></div>
+      </div>
+
+      <div class="pkg" data-pkg="full" onclick="selectFull()">
+        <div class="pkg-top">
+          <div class="pkg-icon">
+            <svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          </div>
+          <div class="pkg-chk" id="psel-full"></div>
+        </div>
+        <div class="pkg-name">System kompletny Pro</div>
+        <div class="pkg-desc">GPS Pro + Alarm CAN + Immobilizer CAN + pełna platforma EVTelematix. Maksymalny poziom ochrony. Zniżka OC/AC do 30%*.</div>
+        <div class="pkg-foot"><span class="ptag t-gold">Zalecany</span><span class="pkg-price">od <span id="pkgp-full">4 990</span> zł</span></div>
+      </div>
+
+    </div>
+    <div class="al warn hidden" id="pkg-warn" style="margin-top:.5rem"><span>⚠</span> Wybierz przynajmniej jeden pakiet.</div>
+    <div class="nav-row">
+      <button class="btn btn-nav" onclick="gotoStep(0)">← Wstecz</button>
+      <button class="btn btn-prim" onclick="gotoStep(2)">Dalej – konfiguracja →</button>
+    </div>
+  </div>
+</div>
+
+<!-- ════════ STEP 2 – KONFIGURACJA ════════ -->
+<div class="step" id="step-2">
+  <div class="sp">
+    <div class="stitle">Konfiguracja systemu</div>
+    <p class="ssub">Rozwiń sekcje które Cię interesują. Ceny przy elementach = koszt sprzętu. Montaż doliczany automatycznie w podsumowaniu.</p>
+  </div>
+
+  <!-- ── GPS ── -->
+  <div class="conf-sec" id="sec-gps" style="display:none">
+    <div class="conf-hd" onclick="toggleConf(this,'bd-gps')">
+      <div class="conf-hd-ico">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 2a7 7 0 0 1 7 7c0 5.25-7 13-7 13S5 14.25 5 9a7 7 0 0 1 7-7z"/></svg>
+      </div>
+      <div class="conf-info">
+        <div class="conf-title">Lokalizator GPS <span id="sc-gps"></span></div>
+        <div class="conf-sub">Basic / Pro / Pro Max · platforma EVTelematix</div>
+      </div>
+      <span class="conf-chev">▼</span>
+    </div>
+    <div class="conf-bd" id="bd-gps">
+
+      <!-- Billing toggle -->
+      <div class="billing-toggle">
+        <span class="bt-label">Abonament:</span>
+        <div class="bt-switch">
+          <div class="bt-opt active" id="bt-monthly" onclick="setBilling('monthly')">Miesięczny</div>
+          <div class="bt-opt" id="bt-yearly" onclick="setBilling('yearly')">Roczny</div>
+        </div>
+        <span class="bt-note" id="bt-note" style="display:none">11 mies. + 1 gratis</span>
+      </div>
+
+      <!-- Tier selection -->
+      <div class="dv" style="margin-top:0">Wybierz wariant GPS</div>
+      <div class="tier-grid" id="tier-grid">
+        <div class="tier-card sel" data-tier="basic" onclick="selTier(this,'basic')">
+          <div class="tier-hd">
+            <div class="tier-name">GPS Basic</div>
+            <div class="tier-desc">Lokalizacja GPS, alerty, historia 30 dni. Podłączenie do akumulatora lub OBD. Bez integracji CAN.</div>
+          </div>
+          <div class="tier-price">od <span id="tp-b">980</span> zł · <span id="tm-b">25</span> zł/mies.</div>
+        </div>
+        <div class="tier-card" data-tier="pro" onclick="selTier(this,'pro')">
+          <div class="tier-hd">
+            <div class="tier-name">GPS Pro <span class="tag tag-b" style="vertical-align:middle">Zalecany</span></div>
+            <div class="tier-desc">Integracja CAN, odczyt paliwa/DTC, ecodriving, historia 365 dni, anti-jamming GSM wbudowany.</div>
+          </div>
+          <div class="tier-price">od <span id="tp-p">1 490</span> zł · <span id="tm-p">39</span> zł/mies.</div>
+        </div>
+        <div class="tier-card" data-tier="promax" onclick="selTier(this,'promax')">
+          <div class="tier-hd">
+            <div class="tier-name">GPS Pro Max <span class="tag tag-g" style="vertical-align:middle">Flota/Tacho</span></div>
+            <div class="tier-desc">Tachograf cyfrowy, ciężarówki/naczepy, zasilanie 10–90V, RS232/RS485, anti-jamming GSM.</div>
+          </div>
+          <div class="tier-price">od <span id="tp-pm">2 190</span> zł · <span id="tm-pm">59</span> zł/mies.</div>
+        </div>
+      </div>
+
+      <!-- Self-install option for Basic -->
+      <div id="self-install-opt" class="al info"><span>ℹ</span><div><strong>GPS Basic – opcja samodzielnego montażu:</strong> Jeśli posiadasz doświadczenie, możemy wysłać sprzęt – podłączysz sam do akumulatora (12V) lub gniazda OBD. W konfiguracji poniżej wybierz "Montaż własny" – koszt instalacji 0 zł.</div></div>
+
+      <!-- Feature table - INFO ONLY, not selectable -->
+      <div class="dv">Co zawiera abonament – porównanie wariantów</div>
+      <div class="al tech" style="margin-bottom:.5rem"><span>ℹ</span><div>Poniższe funkcje są <strong>informacją</strong> o tym co jest wliczone w abonament każdego wariantu. Nie wymagają wyboru – aktywujesz je w aplikacji EVTelematix po instalacji.</div></div>
+      <div class="gps-table-wrap">
+        <table class="gps-table">
+          <thead>
+            <tr>
+              <th>Funkcja</th>
+              <th class="h-basic">Basic</th>
+              <th class="h-pro">Pro</th>
+              <th class="h-promax">Pro Max</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td>Lokalizacja GPS real-time 24/7</td><td><span class="ck">✓</span></td><td><span class="ck">✓</span></td><td><span class="ck">✓</span></td></tr>
+            <tr><td>Aplikacja mobilna iOS + Android</td><td><span class="ck">✓</span></td><td><span class="ck">✓</span></td><td><span class="ck">✓</span></td></tr>
+            <tr><td>Panel webowy</td><td><span class="cx">—</span></td><td><span class="ck">✓</span></td><td><span class="ck">✓</span></td></tr>
+            <tr><td>Historia tras</td><td><span class="cp">30 dni</span></td><td><span class="ck">365 dni</span></td><td><span class="ck">365 dni</span></td></tr>
+            <tr><td>Powiadomienia push / SMS</td><td><span class="ck">✓</span></td><td><span class="ck">✓</span></td><td><span class="ck">✓</span></td></tr>
+            <tr><td>Geofencing (strefy alarmowe)</td><td><span class="ck">✓</span></td><td><span class="ck">✓</span></td><td><span class="ck">✓</span></td></tr>
+            <tr><td>Alert prędkości / trasy</td><td><span class="ck">✓</span></td><td><span class="ck">✓</span></td><td><span class="ck">✓</span></td></tr>
+            <tr><td>Alert zaniku zasilania</td><td><span class="ck">✓</span></td><td><span class="ck">✓</span></td><td><span class="ck">✓</span></td></tr>
+            <tr><td>Alert odłączenia akumulatora</td><td><span class="ck">✓</span></td><td><span class="ck">✓</span></td><td><span class="ck">✓</span></td></tr>
+            <tr><td>Integracja CAN pojazdu</td><td><span class="cx">—</span></td><td><span class="ck">✓</span></td><td><span class="ck">✓</span></td></tr>
+            <tr><td>Poziom paliwa i zużycie (CAN)</td><td><span class="cx">—</span></td><td><span class="ck">✓</span></td><td><span class="ck">✓</span></td></tr>
+            <tr><td>Odczyt błędów DTC (Check Engine)</td><td><span class="cx">—</span></td><td><span class="ck">✓</span></td><td><span class="ck">✓</span></td></tr>
+            <tr><td>Raporty spalania i ecodriving</td><td><span class="cx">—</span></td><td><span class="ck">✓</span></td><td><span class="ck">✓</span></td></tr>
+            <tr><td>Przypomnienia serwisowe / OC / przegląd</td><td><span class="cx">—</span></td><td><span class="ck">✓</span></td><td><span class="ck">✓</span></td></tr>
+            <tr><td>Anti-jamming GSM (4G) – wbudowany</td><td><span class="cx">—</span></td><td><span class="ck">✓</span></td><td><span class="ck">✓</span></td></tr>
+            <tr><td>Wielu użytkowników / role</td><td><span class="cx">—</span></td><td><span class="ck">✓</span></td><td><span class="ck">✓</span></td></tr>
+            <tr><td>Eksport raportów (PDF/Excel)</td><td><span class="cx">—</span></td><td><span class="ck">✓</span></td><td><span class="ck">✓</span></td></tr>
+            <tr><td>API / integracja zewnętrzna</td><td><span class="cx">—</span></td><td><span class="ck">✓</span></td><td><span class="ck">✓</span></td></tr>
+            <tr><td>Tachograf cyfrowy</td><td><span class="cx">—</span></td><td><span class="cx">—</span></td><td><span class="ck">✓</span></td></tr>
+            <tr><td>Zasilanie 10–90V DC</td><td><span class="cx">—</span></td><td><span class="cx">—</span></td><td><span class="ck">✓</span></td></tr>
+            <tr><td>RS232 / RS485</td><td><span class="cx">—</span></td><td><span class="cx">—</span></td><td><span class="ck">✓</span></td></tr>
+            <tr><td>Karta SIM IoT wliczona</td><td><span class="ck">✓</span></td><td><span class="ck">✓</span></td><td><span class="ck">✓</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- GPS self-install toggle -->
+      <div class="dv">Sposób montażu jednostki GPS</div>
+      <div class="og" id="gps-install-opts">
+        <div class="oc on" id="gi-pro" onclick="selGpsInstall('pro')">
+          <div class="oi"><div class="ochk">✓</div>
+            <div class="oico"><svg viewBox="0 0 24 24"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg></div>
+            <div class="obdy">
+              <div class="oname">Montaż profesjonalny (przez nas)</div>
+              <div class="odesc">Instalator montuje i uruchamia urządzenie. Podłączenie do zasilania pojazdu, konfiguracja, test działania, aktywacja platformy.</div>
+            </div>
+            <div class="opr-col"><div class="opr" id="pr-gps-pro-inst">wg cennika</div></div>
+          </div>
+        </div>
+        <div class="oc" id="gi-self" onclick="selGpsInstall('self')">
+          <div class="oi"><div class="ochk">✓</div>
+            <div class="oico"><svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div>
+            <div class="obdy">
+              <div class="oname">Montaż własny <span class="tag tag-b">GPS Basic</span></div>
+              <div class="odesc">Wysyłamy sprzęt – podłączasz sam do gniazda OBD lub akumulatora 12V. Instrukcja i zdalne wsparcie techniczne wliczone. Dotyczy tylko GPS Basic.</div>
+              <div class="otip g">Zero kosztu montażu – sprzęt wysyłamy kurierem</div>
+            </div>
+            <div class="opr-col"><div class="opr" style="color:var(--green)">0 zł montaż</div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Anti-jamming GNSS -->
+      <div class="dv">Opcja dodatkowa</div>
+      <div class="oc" id="o-antijam" onclick="togOpt(this,'antijam',P.antijam_hw,P.antijam_inst,'Moduł Anti-Jamming GNSS')">
+        <div class="oi"><div class="ochk">✓</div>
+          <div class="oico"><svg viewBox="0 0 24 24"><path d="M1 6l5 5 4-4 9 9"/><path d="M5.5 11.5L12 18l8-8"/><circle cx="17" cy="12" r="1"/></svg></div>
+          <div class="obdy">
+            <div class="oname">Moduł Anti-Jamming GNSS <span class="tag tag-g">Premium</span></div>
+            <div class="odesc">Fizyczny moduł chroniący antenę GPS przed zagłuszaczami (jammerami). Złodzieje używają jammera by wyłączyć lokalizator – ten moduł utrzymuje pozycjonowanie nawet przy aktywnym zagłuszaniu. Anti-jamming sieci 4G GSM jest wbudowany w Pro/Pro Max gratis.</div>
+          </div>
+          <div class="opr-col"><div class="opr" id="pr-antijam">200 zł</div><div class="oio">+ <span id="inst-antijam">50</span> zł montaż</div></div>
+        </div>
+      </div>
+
+    </div><!-- /bd-gps -->
+  </div><!-- /sec-gps -->
+
+  <!-- ── IMMOBILIZER ── -->
+  <div class="conf-sec" id="sec-immo" style="display:none">
+    <div class="conf-hd" onclick="toggleConf(this,'bd-immo')">
+      <div class="conf-hd-ico">
+        <svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+      </div>
+      <div class="conf-info">
+        <div class="conf-title">Immobilizer – zabezpieczenie silnika <span id="sc-immo"></span></div>
+        <div class="conf-sub">CAN lub analogowy · 4 sposoby odblokowywania · zdalna blokada</div>
+      </div>
+      <span class="conf-chev">▼</span>
+    </div>
+    <div class="conf-bd" id="bd-immo">
+      <div class="al ok"><span>✓</span><div>Immobilizer to najskuteczniejsze zabezpieczenie przed kradzieżą. Złodziej nie uruchomi silnika nawet z oryginalnym kluczykiem. Immobilizer możesz wybrać <strong>bez GPS</strong> – działa niezależnie.</div></div>
+
+      <div class="dv" style="margin-top:0">Typ immobilizera</div>
+      <div class="og">
+        <div class="oc" id="o-immo-a" onclick="selImmo('analog')">
+          <div class="oi"><div class="ochk">✓</div>
+            <div class="oico"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/></svg></div>
+            <div class="obdy">
+              <div class="oname">Immobilizer analogowy (przekaźnik) <span class="tag tag-b">Ekonomiczny</span></div>
+              <div class="odesc">Przekaźnik na obwodzie zapłonu. Prosta, niezawodna blokada fizyczna. Montaż bez ingerencji w magistralę CAN.</div>
+              <div class="otip w">Brak sterowania z aplikacji mobilnej – tylko obsługa fizyczna</div>
+              <div class="dv" style="font-size:.58rem;margin:.38rem 0 .2rem">Sposoby odblokowywania</div>
+              <div style="font-size:.68rem;color:var(--muted)">✓ Ukryty przycisk w pojeździe &nbsp;·&nbsp; ✓ Pilot RF (opcja +80 zł)</div>
+            </div>
+            <div class="opr-col"><div class="opr" id="pr-immo-a">390 zł</div><div class="oio">sprzęt + montaż</div></div>
+          </div>
+        </div>
+        <div class="oc" id="o-immo-c" onclick="selImmo('can')">
+          <div class="oi"><div class="ochk">✓</div>
+            <div class="oico"><svg viewBox="0 0 24 24"><path d="M18 20V10"/><path d="M12 20V4"/><path d="M6 20v-6"/></svg></div>
+            <div class="obdy">
+              <div class="oname">Immobilizer CAN (cyfrowy) <span class="tag tag-r">Zalecany</span></div>
+              <div class="odesc">Blokada przez magistralę CAN – bez cięcia przewodów. 1 brylok elektroniczny w zestawie. Zdalna blokada z aplikacji mobilnej w 2 sekundy. Pełny log prób uruchomienia.</div>
+              <div class="otip g">Najskuteczniejszy · bez ingerencji w instalację elektryczną pojazdu</div>
+              <div class="dv" style="font-size:.58rem;margin:.38rem 0 .2rem">4 sposoby odblokowywania</div>
+              <div style="font-size:.68rem;color:var(--muted)">✓ Brylok elektroniczny &nbsp;·&nbsp; ✓ Aplikacja mobilna &nbsp;·&nbsp; ✓ Ukryty przycisk &nbsp;·&nbsp; ✓ Pilot zdalny</div>
+            </div>
+            <div class="opr-col"><div class="opr" id="pr-immo-c">2 000 zł</div><div class="oio">sprzęt + 550 zł montaż + brylok</div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Brylok extra -->
+      <div id="brylok-sec" style="display:none">
+        <div class="dv">Dodatkowe bryloki</div>
+        <div class="oc">
+          <div class="oi">
+            <div class="oico"><svg viewBox="0 0 24 24"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/></svg></div>
+            <div class="obdy">
+              <div class="oname">Dodatkowy brylok elektroniczny</div>
+              <div class="odesc">Każdy brylok = oddzielna autoryzacja. Dla drugiego kierowcy, pracownika lub zapasowy.</div>
+              <div class="qrow">
+                <button class="qb" onclick="chgQty('brylok',-1,event)">−</button>
+                <span class="qn" id="q-brylok">0</span>
+                <button class="qb" onclick="chgQty('brylok',1,event)">+</button>
+                <span class="ql">szt. × <span id="pr-brylok-u">250</span> zł/szt.</span>
+              </div>
+            </div>
+            <div class="opr-col"><div class="opr" id="pr-brylok">0 zł</div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Immo extras -->
+      <div class="dv">Opcje immobilizera</div>
+      <div class="og og2">
+        <div class="oc" id="o-immo-siren" onclick="togOpt(this,'immo-siren',P.siren_hw,P.siren_inst,'Syrena alarmowa (immobilizer)')">
+          <div class="oi"><div class="ochk">✓</div>
+            <div class="oico"><svg viewBox="0 0 24 24"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"/></svg></div>
+            <div class="obdy"><div class="oname">Syrena alarmowa</div>
+              <div class="odesc">Sygnalizacja przy próbie uruchomienia bez autoryzacji. 118 dB.</div>
+            </div><div class="opr-col"><div class="opr" id="pr-immo-siren">65 zł</div><div class="oio">+ 35 zł montaż</div></div>
+          </div>
+        </div>
+        <div class="oc" id="o-immo-existing" onclick="togOpt(this,'immo-existing',0,P.existing_inst,'Integracja z istniejącym alarmem')">
+          <div class="oi"><div class="ochk">✓</div>
+            <div class="oico"><svg viewBox="0 0 24 24"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg></div>
+            <div class="obdy"><div class="oname">Podłączenie pod istniejący alarm</div>
+              <div class="odesc">Integracja z fabrycznym lub zewnętrznym systemem alarmowym pojazdu. Wymaga diagnozy.</div>
+              <div class="otip w">Wymagana wcześniejsza diagnoza pojazdu</div>
+            </div><div class="opr-col"><div class="opr ask">wycena</div><div class="oio">indywidualna</div></div>
+          </div>
+        </div>
+      </div>
+    </div><!-- /bd-immo -->
+  </div>
+
+  <!-- ── ALARM ── -->
+  <div class="conf-sec" id="sec-alarm" style="display:none">
+    <div class="conf-hd" onclick="toggleConf(this,'bd-alarm')">
+      <div class="conf-hd-ico">
+        <svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+      </div>
+      <div class="conf-info">
+        <div class="conf-title">Alarm CAN i sygnalizacja <span id="sc-alarm"></span></div>
+        <div class="conf-sub">Sterowany pilotem fabrycznym · syreny · powiadomienia SMS/push</div>
+      </div>
+      <span class="conf-chev">▼</span>
+    </div>
+    <div class="conf-bd" id="bd-alarm">
+      <div class="al tech"><span>ℹ</span><div>Alarm CAN integruje się z elektroniką pojazdu przez magistralę CAN. Sterowanie fabrycznym pilotem – bez dodatkowych kluczyków. Powiadomienie SMS i push przy każdym zdarzeniu.</div></div>
+      <div class="og">
+        <div class="oc on req">
+          <div class="oi"><div class="ochk">✓</div>
+            <div class="oico"><svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg></div>
+            <div class="obdy">
+              <div class="oname">Alarm CAN (cyfrowy) <span class="tag tag-r">Podstawa zestawu</span></div>
+              <div class="odesc">Integracja z CAN pojazdu. 4 tryby pracy. Powiadomienie SMS + push. Uzbrajanie/rozbrajanie pilotem fabrycznym. Kompatybilny ze wszystkimi czujnikami.</div>
+            </div><div class="opr-col"><div class="opr" id="pr-alarm-base">1 799 zł</div><div class="oio">sprzęt + montaż</div></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="dv">Syreny</div>
+      <div class="oc req" style="margin-bottom:.42rem">
+        <div class="oi">
+          <div class="ochk" style="background:var(--amber);border-color:var(--amber)">✓</div>
+          <div class="oico"><svg viewBox="0 0 24 24"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/></svg></div>
+          <div class="obdy">
+            <div class="oname">Syreny piezoelektryczne 118 dB <span class="tag tag-r">Min. 2 szt.</span></div>
+            <div class="odesc">Zewnętrzna (pod maską) + wewnętrzna. Zasilanie z pojazdu.</div>
+            <div class="qrow">
+              <button class="qb" onclick="chgQty('sirens',-1,event)">−</button>
+              <span class="qn" id="q-sirens">2</span>
+              <button class="qb" onclick="chgQty('sirens',1,event)">+</button>
+              <span class="ql">szt. × <span id="pr-siren-u">65</span> zł + <span id="inst-siren-u">35</span> zł montaż · max 4</span>
+            </div>
+          </div>
+          <div class="opr-col"><div class="opr" id="pr-sirens">130 zł</div></div>
+        </div>
+      </div>
+
+      <!-- Stroboscope - only installation service -->
+      <div class="oc" id="o-strobe" onclick="togOpt(this,'strobe',0,P.strobe_inst,'Stroboskop LED – usługa instalacji')">
+        <div class="oi"><div class="ochk">✓</div>
+          <div class="oico"><svg viewBox="0 0 24 24"><path d="M9.663 17h4.673M12 3v1m6.364 1.636-.707.707M21 12h-1M4 12H3m3.343-5.657-.707-.707m2.828 9.9a5 5 0 1 1 7.072 0l-.548.547A3.374 3.374 0 0 0 14 18.469V19a2 2 0 1 1-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/></svg></div>
+          <div class="obdy">
+            <div class="oname">Stroboskop LED – usługa instalacji</div>
+            <div class="odesc">Podłączenie i konfiguracja stroboskopu LED przy alarmie. Sprzęt dostarczasz własny lub zamawiamy osobno – wycena po kontakcie. Cena dotyczy wyłącznie usługi montażu.</div>
+            <div class="otip g">Sygnalizacja wizualna nocna – odstrasza złodzieja bez hałasu</div>
+          </div>
+          <div class="opr-col"><div class="opr" id="pr-strobe"><span id="pr-strobe-v">40</span> zł</div><div class="oio">tylko montaż</div></div>
+        </div>
+      </div>
+    </div><!-- /bd-alarm -->
+  </div>
+
+  <!-- ── CZUJNIKI ── -->
+  <div class="conf-sec" id="sec-sensors" style="display:none">
+    <div class="conf-hd" onclick="toggleConf(this,'bd-sensors')">
+      <div class="conf-hd-ico">
+        <svg viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+      </div>
+      <div class="conf-info">
+        <div class="conf-title">Czujniki – okna, drzwi, wnętrze <span id="sc-sensors"></span></div>
+        <div class="conf-sub">Kontaktrony · PIR · gaz · zbicie szyby · temperatura · holowanie</div>
+      </div>
+      <span class="conf-chev">▼</span>
+    </div>
+    <div class="conf-bd" id="bd-sensors">
+
+      <div class="dv" style="margin-top:0">Okna i drzwi – kontaktrony</div>
+      <div class="oc req" style="margin-bottom:.4rem">
+        <div class="oi">
+          <div class="ochk" style="background:var(--amber);border-color:var(--amber)">✓</div>
+          <div class="oico"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 3v18"/></svg></div>
+          <div class="obdy">
+            <div class="oname">Kontaktrony bezprzewodowe <span class="tag tag-b">Bez wiercenia</span></div>
+            <div class="odesc">Montaż na taśmę 2-stronną. Zasięg 100m, bateria CR123A 3–5 lat. Alarm w ułamku sekundy od otwarcia. Standard: 3 szt. (drzwi boczne + tylne + okno sypialni).</div>
+            <div class="qrow">
+              <button class="qb" onclick="chgQty('cbw',-1,event)">−</button>
+              <span class="qn" id="q-cbw">0</span>
+              <button class="qb" onclick="chgQty('cbw',1,event)">+</button>
+              <span class="ql">szt. × <span id="pr-cbw-u">75</span> zł + <span id="inst-cbw-u">45</span> zł montaż</span>
+            </div>
+            <div class="otip g" id="tip-cbw" style="display:none">✓ 3 szt. = standard kamper</div>
+          </div>
+          <div class="opr-col"><div class="opr" id="pr-cbw">0 zł</div></div>
+        </div>
+      </div>
+      <div class="oc req" style="margin-bottom:.6rem">
+        <div class="oi">
+          <div class="ochk" style="background:var(--amber);border-color:var(--amber)">✓</div>
+          <div class="oico"><svg viewBox="0 0 24 24"><path d="M4 4h16v16H4z"/><path d="M4 9h16"/><path d="M9 9v11"/></svg></div>
+          <div class="obdy">
+            <div class="oname">Kontaktrony kablowe <span class="tag tag-b">Z wierceniem</span></div>
+            <div class="odesc">Wpuszczany czujnik kablowy – trwalszy, bez baterii. Montaż z wierceniem w karoserii. Polecany do drzwi głównych.</div>
+            <div class="qrow">
+              <button class="qb" onclick="chgQty('cw',-1,event)">−</button>
+              <span class="qn" id="q-cw">0</span>
+              <button class="qb" onclick="chgQty('cw',1,event)">+</button>
+              <span class="ql">szt. × <span id="pr-cw-u">45</span> zł + <span id="inst-cw-u">70</span> zł montaż</span>
+            </div>
+          </div>
+          <div class="opr-col"><div class="opr" id="pr-cw">0 zł</div></div>
+        </div>
+      </div>
+
+      <div class="dv">Czujniki wewnętrzne</div>
+      <div class="og og2">
+        <div class="oc" id="o-pir" onclick="null">
+          <div class="oi">
+            <div class="oico"><svg viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></div>
+            <div class="obdy">
+              <div class="oname">PIR wewnętrzny <span class="tag tag-r">Zalecany</span></div>
+              <div class="odesc">Detektor ruchu podczerwony. Alarm + push. Ukryty montaż. Działa gdy drzwi otwarto cicho.</div>
+              <div class="qrow">
+                <button class="qb" onclick="chgQty('pir',-1,event)">−</button>
+                <span class="qn" id="q-pir">0</span>
+                <button class="qb" onclick="chgQty('pir',1,event)">+</button>
+                <span class="ql">szt. × <span id="pr-pir-u">95</span> zł + <span id="inst-pir-u">55</span> zł</span>
+              </div>
+            </div>
+            <div class="opr-col"><div class="opr" id="pr-pir">0 zł</div></div>
+          </div>
+        </div>
+        <div class="oc" id="o-glass" onclick="null">
+          <div class="oi">
+            <div class="oico"><svg viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg></div>
+            <div class="obdy">
+              <div class="oname">Czujnik zbicia szyby <span class="tag tag-b">Popularne</span></div>
+              <div class="odesc">Mikrofon + czujnik ciśnienia 2w1. Tylko częstotliwość tłuczonego szkła. Min. fałszywych alarmów.</div>
+              <div class="qrow">
+                <button class="qb" onclick="chgQty('glass',-1,event)">−</button>
+                <span class="qn" id="q-glass">0</span>
+                <button class="qb" onclick="chgQty('glass',1,event)">+</button>
+                <span class="ql">szt. × <span id="pr-glass-u">130</span> zł + <span id="inst-glass-u">50</span> zł</span>
+              </div>
+            </div>
+            <div class="opr-col"><div class="opr" id="pr-glass">0 zł</div></div>
+          </div>
+        </div>
+        <div class="oc" id="o-gas" onclick="togOpt(this,'gas',P.gas_hw,P.gas_inst,'Czujnik gazu LPG/CO')">
+          <div class="oi"><div class="ochk">✓</div>
+            <div class="oico"><svg viewBox="0 0 24 24"><path d="M12 22c-4.97 0-9-4.03-9-9 0-2.12.74-4.07 1.97-5.6L12 2l7.03 5.4A8.96 8.96 0 0 1 21 13c0 4.97-4.03 9-9 9z"/></svg></div>
+            <div class="obdy"><div class="oname">Czujnik gazu LPG / CO <span class="tag tag-g">Pro</span></div>
+              <div class="odesc">Wykrywa propan-butan, CO i gaz usypiający. Alarm + wentylacja. Wymagany przez wielu ubezpieczycieli przy kuchni gazowej.</div>
+              <div class="otip w">Kuchnia gazowa w kamperze → obowiązkowy dla ubezpieczenia</div>
+            </div><div class="opr-col"><div class="opr" id="pr-gas">185 zł</div><div class="oio">+ <span id="inst-gas">90</span> zł montaż</div></div>
+          </div>
+        </div>
+        <div class="oc" id="o-temp" onclick="togOpt(this,'temp',P.temp_hw,P.temp_inst,'Czujnik temperatury wnętrza 1-Wire')">
+          <div class="oi"><div class="ochk">✓</div>
+            <div class="oico"><svg viewBox="0 0 24 24"><path d="M14 14.76V3.5a2.5 2.5 0 0 0-5 0v11.26a4.5 4.5 0 1 0 5 0z"/></svg></div>
+            <div class="obdy"><div class="oname">Czujnik temperatury wnętrza</div>
+              <div class="odesc">Monitoring temp. kabiny real-time w aplikacji. Alert przy przegrzaniu/zimnie. Protokół 1-Wire – nie zajmuje wejść DIN.</div>
+            </div><div class="opr-col"><div class="opr" id="pr-temp">110 zł</div><div class="oio">+ <span id="inst-temp">40</span> zł montaż</div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Eye Sensor -->
+      <div class="oc" id="o-eyesensor" onclick="togOpt(this,'eyesensor',P.eyesensor_hw,P.eyesensor_inst,'Eye Sensor – temperatura/wilgotność bezprzewodowy')">
+        <div class="oi"><div class="ochk">✓</div>
+          <div class="oico"><svg viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></div>
+          <div class="obdy">
+            <div class="oname">Eye Sensor – temperatura i wilgotność <span class="tag tag-n">Bluetooth · Bezprzew.</span></div>
+            <div class="odesc">Bezprzewodowy czujnik Bluetooth mierzący temperaturę i wilgotność wewnątrz pojazdu/naczepy. Alert push przy przekroczeniu ustawionych progów. Zasięg BT do 30m. Bateria CR2032 – ok. 12 miesięcy. Montaż bez okablowania – przyklejany. Wymaga EVTelematix Pro.</div>
+            <div class="otip g">Idealny do kamperów, przyczep chłodniczych, transportu leków, opieki nad zwierzętami</div>
+          </div><div class="opr-col"><div class="opr" id="pr-eyesensor">190 zł</div><div class="oio">+ <span id="inst-eyesensor">30</span> zł aktyw.</div></div>
+        </div>
+      </div>
+
+      <div class="dv">Ochrona zewnętrzna</div>
+      <div class="og og2">
+        <div class="oc" id="o-pirext" onclick="togOpt(this,'pirext',P.pirext_hw,P.pirext_inst,'PIR zewnętrzny – ciche powiadomienie')">
+          <div class="oi"><div class="ochk">✓</div>
+            <div class="oico"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg></div>
+            <div class="obdy"><div class="oname">PIR zewnętrzny <span class="tag tag-b">Popularne</span></div>
+              <div class="odesc">Ruch przy pojeździe → TYLKO cichy push/SMS. Brak syreny. Wiesz o zagrożeniu zanim złodziej dotrze do drzwi. Zasięg 12m, 110°. Aktywuje kamerę.</div>
+            </div><div class="opr-col"><div class="opr" id="pr-pirext">120 zł</div><div class="oio">+ <span id="inst-pirext">70</span> zł montaż</div></div>
+          </div>
+        </div>
+        <div class="oc" id="o-tow" onclick="togOpt(this,'tow',P.tow_hw,P.tow_inst,'Czujnik holowania 3D')">
+          <div class="oi"><div class="ochk">✓</div>
+            <div class="oico"><svg viewBox="0 0 24 24"><path d="M5 17H3a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11a2 2 0 0 1 2 2v3"/><rect x="9" y="11" width="14" height="10" rx="2"/><circle cx="12" cy="21" r="1"/><circle cx="20" cy="21" r="1"/></svg></div>
+            <div class="obdy"><div class="oname">Czujnik holowania 3D <span class="tag tag-g">Pro</span></div>
+              <div class="odesc">Akcelerometr wykrywa załadunek na lawetę. Alarm + blokada + push w 3 sekundy. Kradzież lawetą rośnie w Polsce.</div>
+              <div class="otip w">Najczęstszy sposób kradzieży kamperów i vanów</div>
+            </div><div class="opr-col"><div class="opr" id="pr-tow">160 zł</div><div class="oio">+ <span id="inst-tow">80</span> zł montaż</div></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="dv">Opcje profesjonalne</div>
+      <div class="og og2">
+        <div class="oc" id="o-camera" onclick="togOpt(this,'camera',P.camera_hw,P.camera_inst,'Kamera zdarzeń i włamań')">
+          <div class="oi"><div class="ochk">✓</div>
+            <div class="oico"><svg viewBox="0 0 24 24"><path d="M23 7l-7 5 7 5V7z"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg></div>
+            <div class="obdy"><div class="oname">Kamera zdarzeń / włamań <span class="tag tag-g">Pro</span></div>
+              <div class="odesc">Nagrywanie przy alarmie lub PIR. Bufor 10 sek. przed zdarzeniem. Karta SD + chmura. Dowód dla ubezpieczalni i policji.</div>
+              <div class="otip g">Ubezpieczyciele akceptują nagrania – szybsza wypłata odszkodowania</div>
+            </div><div class="opr-col"><div class="opr" id="pr-camera">490 zł</div><div class="oio">+ <span id="inst-camera">150</span> zł montaż</div></div>
+          </div>
+        </div>
+        <div class="oc" id="o-smoke" onclick="togOpt(this,'smoke',0,0,'Generator dymu ochronny – wycena indywidualna')">
+          <div class="oi"><div class="ochk">✓</div>
+            <div class="oico"><svg viewBox="0 0 24 24"><path d="M8 16a5 5 0 0 1-.916-9.916 5.002 5.002 0 0 1 9.832 0A5.002 5.002 0 0 1 16 16"/><path d="M8 16v6"/><path d="M16 16v6"/><path d="M12 16v6"/></svg></div>
+            <div class="obdy"><div class="oname">Generator dymu ochronny <span class="tag tag-g">Pro</span></div>
+              <div class="odesc">Wypełnia kabinę nieszkodliwym dymem w 10 sekund. Złodziej nic nie widzi. Stosowany w bankach i jubilerach. Aktywacja przez alarm lub ręcznie z aplikacji.</div>
+              <div class="otip warn" style="color:var(--amber)">Cena do uzgodnienia (~2 000 zł) – skontaktuj się z nami</div>
+            </div><div class="opr-col"><div class="opr ask">Wycena<br>indyw.</div></div>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /bd-sensors -->
+  </div>
+
+  <div class="nav-row">
+    <button class="btn btn-nav" onclick="gotoStep(1)">← Wstecz</button>
+    <button class="btn btn-prim" onclick="gotoStep(3)">Dalej – instalacja →</button>
+  </div>
+</div>
+
+<!-- ════════ STEP 3 – INSTALACJA ════════ -->
+<div class="step" id="step-3">
+  <div class="sp">
+    <div class="stitle">Instalacja</div>
+    <p class="ssub">Wybierz sposób realizacji montażu. Termin do ustalenia – skontaktuje się z Tobą instalator.</p>
+    <div class="inst-grid">
+      <div class="inst-card on" id="inst-w" onclick="selInst('workshop')">
+        <div class="inst-ico"><svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></div>
+        <div class="inst-name">Warsztat</div>
+        <div class="inst-desc">Przywozisz pojazd do warsztatu. Czas montażu 2–5 godzin. Termin do uzgodnienia po kontakcie.</div>
+      </div>
+      <div class="inst-card" id="inst-m" onclick="selInst('mobile')">
+        <div class="inst-ico"><svg viewBox="0 0 24 24"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg></div>
+        <div class="inst-name">Dojazd do klienta</div>
+        <div class="inst-desc">Instalator przyjeżdża do Ciebie. Cała Polska. Termin do uzgodnienia po kontakcie.</div>
+      </div>
+    </div>
+
+    <div class="mob-calc hidden" id="mob-calc">
+      <div style="font-size:.79rem;font-weight:500;color:var(--text);margin-bottom:.35rem">Szacuj koszt dojazdu</div>
+      <div style="font-size:.7rem;color:var(--muted);margin-bottom:.48rem">Podaj odległość lub miejscowość – dokładna kwota zostanie potwierdzona przez instalatora.</div>
+      <div class="km-row">
+        <label>Odległość (km):</label>
+        <input type="number" class="km-inp" id="km-input" min="0" max="1000" value="0" oninput="calcTravel()">
+        <span class="km-res" id="travel-res"></span>
+      </div>
+      <div class="fg" style="margin-top:.52rem">
+        <label>Miejscowość / kod pocztowy</label>
+        <input type="text" id="inst-loc" placeholder="np. Warszawa, Kraków 30-001...">
+      </div>
+      <div class="al info" style="margin-top:.55rem"><span>ℹ</span><div>Stawka dojazdu: <strong>2 zł/km brutto × 2 strony</strong> (tam i z powrotem) + robocizna. Koszt szacunkowy – potwierdzenie po kontakcie.</div></div>
+    </div>
+
+    <div class="al info" style="margin-top:.55rem"><span>ℹ</span><div>Po wysłaniu zapytania skontaktuje się z Tobą instalator w celu uzgodnienia terminu, lokalizacji i finalnej wyceny. Wycena online jest orientacyjna.</div></div>
+
+    <div class="dv">Preferowany termin i uwagi</div>
+    <div class="fgrid" style="margin-bottom:.6rem">
+      <div class="fg"><label>Preferowana data</label><input type="date" id="pref-date"></div>
+      <div class="fg"><label>Priorytet</label>
+        <select id="pref-prio">
+          <option value="normal">Normalny (1–2 tygodnie)</option>
+          <option value="urgent">Pilny (jak najszybciej)</option>
+          <option value="flex">Elastyczny (do ustalenia)</option>
+        </select>
+      </div>
+    </div>
+    <div class="fg">
+      <label>Dodatkowe uwagi</label>
+      <textarea id="c-notes" rows="2" placeholder="Opisz pojazd, specjalne wymagania, pytania do montażu..."></textarea>
+    </div>
+
+    <div class="nav-row">
+      <button class="btn btn-nav" onclick="gotoStep(2)">← Wstecz</button>
+      <button class="btn btn-gold" onclick="gotoStep(4)">Generuj wycenę →</button>
+    </div>
+  </div>
+</div>
+
+<!-- ════════ STEP 4 – WYCENA ════════ -->
+<div class="step" id="step-4">
+  <div class="sp">
+    <div class="al ok" style="margin-bottom:.75rem"><span>✓</span><div>Wycena wygenerowana. Wyślemy ją na Twój e-mail. Skontaktujemy się w ciągu <strong>24 godzin roboczych</strong>.</div></div>
+    <div id="summary-content"></div>
+    <button class="btn btn-prim full" onclick="sendEmail()">Wyślij wycenę e-mailem</button>
+    <button class="btn btn-sec full" onclick="window.print()">Drukuj / Zapisz PDF</button>
+    <div class="al info" style="margin-top:.6rem"><span>ℹ</span><div>Pytania? <strong><a href="tel:+48516956809" style="color:var(--blue)">+48 516 956 809</a></strong> · <a href="mailto:info@evtelematix.com" style="color:var(--blue)">info@evtelematix.com</a> · <a href="https://evtelematix.pl" style="color:var(--blue)" target="_blank">evtelematix.pl</a></div></div>
+    <div style="text-align:center;margin-top:.6rem"><button class="btn btn-nav" onclick="resetAll()">+ Nowa konfiguracja</button></div>
+  </div>
+</div>
+
+</div><!-- left col -->
+
+<!-- ════════ SIDEBAR CART ════════ -->
+<div class="sidebar">
+  <div class="cart-box">
+    <div class="cart-hd"><div class="cart-title">Wycena na żywo</div><div class="cart-cnt" id="cart-cnt">0 elem.</div></div>
+    <div class="cart-bd">
+      <div class="cart-empty" id="cart-empty">Wybierz pakiety i opcje</div>
+      <div id="cart-lines" style="display:none">
+        <div id="cart-hw"></div>
+        <div id="cart-plat"></div>
+        <div class="cart-div"></div>
+        <div class="csub"><span>Sprzęt</span><span id="sub-hw">0 zł</span></div>
+        <div class="csub"><span>Montaż</span><span id="sub-inst">0 zł</span></div>
+        <div class="csub hidden" id="sub-travel-row"><span>Dojazd (szac.)</span><span id="sub-travel">0 zł</span></div>
+        <div class="csub hidden" id="sub-plat-row"><span>Platforma</span><span id="sub-plat">—</span></div>
+        <div class="ctbox">
+          <div>
+            <div class="ctlabel">Razem jednorazowo</div>
+            <div class="ctprice" id="cart-total">0 zł</div>
+            <div class="ctpsub" id="cart-total-sub"></div>
+          </div>
+        </div>
+        <div class="netto-note">Ceny netto PLN</div>
+        <button class="btn btn-prim full" onclick="gotoStep(3)" id="cart-cta" style="display:none;font-size:.76rem;padding:.65rem">Dalej →</button>
+        <div class="disc-note">Pomagamy w uzyskaniu zniżki na OC/AC – do 30%*<br><span style="font-size:.62rem;opacity:.8">*zależy od indywidualnej oferty ubezpieczyciela</span></div>
+        <button class="btn-reset" onclick="resetAll()">✕ Wyczyść konfigurację</button>
+        <div style="margin-top:.55rem;font-size:.64rem;color:var(--muted);text-align:center;line-height:1.65">
+          <a href="tel:+48516956809" style="color:var(--blue)">+48 516 956 809</a><br>
+          <a href="mailto:info@evtelematix.com" style="color:var(--blue)">info@evtelematix.com</a><br>
+          <a href="https://evtelematix.pl" style="color:var(--blue)" target="_blank">evtelematix.pl</a><br>
+          Bezpłatna wycena · cała Polska
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</div><!-- main -->
+
+<footer>
+  <a href="https://evtelematix.pl" target="_blank">EVTelematix</a> · tel. <a href="tel:+48516956809">+48 516 956 809</a> · <a href="mailto:info@evtelematix.com">info@evtelematix.com</a> · <a href="https://evtelematix.pl" target="_blank">evtelematix.pl</a><br>
+  <span style="opacity:.6">Ceny netto PLN. Wycena orientacyjna – finalna cena po bezpłatnej diagnozie pojazdu. Montaż na terenie całej Polski.<br>* Wysokość zniżki OC/AC zależy od indywidualnej oferty ubezpieczyciela – nie jest gwarantowana.</span>
+</footer>
+
+<!-- ════════ ADMIN PANEL ════════ -->
+<div class="adm-overlay" id="adm-overlay">
+  <div class="adm-panel">
+    <div class="adm-hdr"><div class="adm-title">Panel administracyjny – EVTelematix</div><button class="adm-close" onclick="closeAdmin()">✕</button></div>
+    <div class="adm-bd">
+      <div id="adm-login">
+        <div class="login-form">
+          <div style="text-align:center;font-family:'Syne',sans-serif;font-weight:700;color:var(--navy)">Logowanie</div>
+          <input type="password" id="adm-pass" placeholder="Hasło" onkeydown="if(event.key==='Enter')doLogin()">
+          <button class="adm-save" onclick="doLogin()">Zaloguj</button>
+          <div class="login-err hidden" id="login-err">Nieprawidłowe hasło</div>
+        </div>
+      </div>
+      <div id="adm-content" style="display:none"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ════════════════════════════════════════════════════════════
+// DEFAULT PRICES
+// ════════════════════════════════════════════════════════════
+const DEF = {
+  // GPS units (sprzęt + montaż = cena klienta)
+  unit_basic:780,     unit_basic_inst:200,   // FTC880 ~46 EUR zakup
+  unit_pro:1190,      unit_pro_inst:250,     // FTC305 CAN ~69 EUR zakup
+  unit_promax:1890,   unit_promax_inst:300,  // FTC305 adv.
+
+  // Subscriptions
+  sub_basic:25, sub_pro:39, sub_promax:59,
+
+  // Immobilizer
+  immo_analog:390,    immo_analog_inst:0,    // all-in (relay 2.5 EUR + robocizna)
+  immo_can:1450,      immo_can_inst:550,     // CAN: 1450 + 550 montaż = 2000 total
+  brylok:250,
+
+  // Alarm
+  alarm_hw:1199,      alarm_inst:600,
+
+  // Syrena
+  siren_hw:65,        siren_inst:35,
+
+  // Stroboscope - only install
+  strobe_inst:40,
+
+  // Anti-jamming
+  antijam_hw:200,     antijam_inst:50,
+
+  // Kontaktrony (Elmes CTX5 hurt 55 zł)
+  cbw_hw:75,          cbw_inst:45,
+  cw_hw:45,           cw_inst:70,
+
+  // Sensors (Elmes PTX50 hurt 79 zł, GBX1 hurt 109 zł)
+  pir_hw:95,          pir_inst:55,
+  pirext_hw:120,      pirext_inst:70,
+  glass_hw:130,       glass_inst:50,
+  gas_hw:185,         gas_inst:90,
+  temp_hw:110,        temp_inst:40,
+  tow_hw:160,         tow_inst:80,
+  camera_hw:490,      camera_inst:150,
+
+  // Eye Sensor
+  eyesensor_hw:190,   eyesensor_inst:30,
+
+  // Immo extras
+  immo_siren_hw:65,   immo_siren_inst:35,
+  existing_inst:200,
+
+  // Travel
+  km_rate:2,          hourly_rate:250,      travel_h:2.5,
+};
+
+// Ceny zakupu (do panelu admina – kolumna marży)
+const BUY_PRICES = {
+  unit_basic:200, unit_pro:300, unit_promax:345,
+  immo_analog:11, immo_can:532, brylok:50,
+  alarm_hw:1199,
+  siren_hw:30, antijam_hw:200,
+  cbw_hw:55, cw_hw:25,
+  pir_hw:79, pirext_hw:80, glass_hw:109,
+  gas_hw:70, temp_hw:35, tow_hw:80, camera_hw:300,
+  eyesensor_hw:120,
+};
+
+const LABELS = {
+  unit_basic:'Jednostka GPS Basic (sprzęt)',unit_basic_inst:'Montaż GPS Basic',
+  unit_pro:'Jednostka GPS Pro (sprzęt)',unit_pro_inst:'Montaż GPS Pro',
+  unit_promax:'Jednostka GPS Pro Max (sprzęt)',unit_promax_inst:'Montaż GPS Pro Max',
+  sub_basic:'Abonament Basic (zł/mies.)',sub_pro:'Abonament Pro (zł/mies.)',sub_promax:'Abonament Pro Max (zł/mies.)',
+  immo_analog:'Immobilizer analogowy all-in',immo_can:'Immobilizer CAN (sprzęt)',immo_can_inst:'Montaż immobilizera CAN (netto)',
+  brylok:'Brylok elektroniczny (szt.)',
+  alarm_hw:'Alarm CAN (sprzęt)',alarm_inst:'Montaż alarmu CAN',
+  siren_hw:'Syrena piezo (szt. sprzęt)',siren_inst:'Montaż syreny (szt.)',
+  strobe_inst:'Stroboskop – usługa instalacji',
+  antijam_hw:'Anti-Jamming GNSS (sprzęt)',antijam_inst:'Montaż Anti-Jamming',
+  cbw_hw:'Kontaktron bezprzew. CTX5 (szt.)',cbw_inst:'Montaż kontaktronu bezprzew. (szt.)',
+  cw_hw:'Kontaktron kablowy (szt.)',cw_inst:'Montaż kablowego (szt.)',
+  pir_hw:'PIR wewnętrzny PTX50 (szt. sprzęt)',pir_inst:'Montaż PIR wewnętrznego (szt.)',
+  pirext_hw:'PIR zewnętrzny (sprzęt)',pirext_inst:'Montaż PIR zewnętrznego',
+  glass_hw:'Czujnik zbicia szyby GBX1 (szt.)',glass_inst:'Montaż czujnika szyby (szt.)',
+  gas_hw:'Czujnik gazu LPG/CO (sprzęt)',gas_inst:'Montaż czujnika gazu',
+  temp_hw:'Czujnik temperatury 1-Wire',temp_inst:'Montaż czujnika temp.',
+  tow_hw:'Czujnik holowania 3D',tow_inst:'Montaż czujnika holowania',
+  camera_hw:'Kamera zdarzeń (sprzęt)',camera_inst:'Montaż kamery',
+  eyesensor_hw:'Eye Sensor temp./wilg. BT (sprzęt)',eyesensor_inst:'Aktywacja Eye Sensor',
+  immo_siren_hw:'Syrena dla immobilizera (sprzęt)',immo_siren_inst:'Montaż syreny immobilizer',
+  existing_inst:'Integracja z istniejącym alarmem',
+  km_rate:'Stawka dojazdu (zł/km brutto)',hourly_rate:'Stawka roboczogodziny (zł/h)',travel_h:'Szacowany czas dojazdu (h)',
+};
+
+// In-calculator items (highlighted blue in admin)
+const IN_CALC = new Set([
+  'unit_basic','unit_basic_inst','unit_pro','unit_pro_inst','unit_promax','unit_promax_inst',
+  'sub_basic','sub_pro','sub_promax',
+  'immo_analog','immo_can','immo_can_inst','brylok',
+  'alarm_hw','alarm_inst','siren_hw','siren_inst','strobe_inst',
+  'antijam_hw','antijam_inst',
+  'cbw_hw','cbw_inst','cw_hw','cw_inst',
+  'pir_hw','pir_inst','pirext_hw','pirext_inst','glass_hw','glass_inst',
+  'gas_hw','gas_inst','temp_hw','temp_inst','tow_hw','tow_inst',
+  'camera_hw','camera_inst','eyesensor_hw','eyesensor_inst',
+  'immo_siren_hw','immo_siren_inst','existing_inst','km_rate','hourly_rate',
+]);
+
+function loadP(){try{const s=localStorage.getItem('evt_p_v6');if(s)return{...DEF,...JSON.parse(s)}}catch(e){}return{...DEF}}
+let P = loadP();
+
+// ════════════════════════════════════════════════════════════
+// STATE
+// ════════════════════════════════════════════════════════════
+window.S_vehCount = 1;
+const S = {
+  pkgs: {gps:false, immo:false, alarm:false},
+  gpsTier: 'basic',
+  gpsBilling: 'monthly',
+  gpsInstall: 'pro',
+  opts: {},
+  qty: {sirens:2, cbw:0, cw:0, brylok:0, pir:0, glass:0},
+  immoType: null,
+  install: {type:'workshop', km:0, loc:'', travelCost:0},
+};
+
+// ════════════════════════════════════════════════════════════
+// NAVIGATION
+// ════════════════════════════════════════════════════════════
+function gotoStep(n) {
+  if(n===1) {
+    const f = id => document.getElementById(id)?.value?.trim();
+    if(!window.S_vehCount || !f('l-fname') || !f('l-lname') || !f('l-phone') || !f('l-email') || !f('l-city')) {
+      document.getElementById('lead-err').classList.remove('hidden'); return;
+    }
+    document.getElementById('lead-err').classList.add('hidden');
+  }
+  if(n===2 && !Object.values(S.pkgs).some(Boolean)) {
+    document.getElementById('pkg-warn').classList.remove('hidden'); return;
+  }
+  document.getElementById('pkg-warn')?.classList.add('hidden');
+  if(n===4) buildSummary();
+  document.querySelectorAll('.step').forEach(s=>s.classList.remove('active'));
+  document.getElementById('step-'+n).classList.add('active');
+  for(let i=0;i<=4;i++){const el=document.getElementById('ps'+i);el.classList.remove('active','done');if(i<n)el.classList.add('done');else if(i===n)el.classList.add('active');}
+  const cta=document.getElementById('cart-cta');if(cta)cta.style.display=n>=2?'flex':'none';
+  if(n===2) setupSections();
+  window.scrollTo({top:0,behavior:'smooth'});
+  updateCart();
+}
+
+// ════════════════════════════════════════════════════════════
+// VEHICLE COUNT
+// ════════════════════════════════════════════════════════════
+function setVC(n) {
+  n = Math.max(1, Math.min(999, parseInt(n)||1));
+  window.S_vehCount = n;
+  const el = document.getElementById('vc-input');
+  if(el && el !== document.activeElement) el.value = n;
+  updateCart();
+}
+function adjVC(delta) {
+  const n = (window.S_vehCount||1) + delta;
+  window.S_vehCount = Math.max(1, Math.min(999, n));
+  const el = document.getElementById('vc-input');
+  if(el) el.value = window.S_vehCount;
+  updateCart();
+}
+
+// ════════════════════════════════════════════════════════════
+// PACKAGES – no price on selection
+// ════════════════════════════════════════════════════════════
+function togglePkg(id, el) {
+  S.pkgs[id] = !S.pkgs[id];
+  el.classList.toggle('sel', S.pkgs[id]);
+  document.getElementById('psel-'+id).textContent = S.pkgs[id]?'✓':'';
+  document.getElementById('psel-full').textContent='';
+  document.querySelectorAll('[data-pkg=full]').forEach(e=>e.classList.remove('sel'));
+  document.getElementById('pkg-warn').classList.add('hidden');
+  // DO NOT update cart here - no price on pkg selection
+}
+
+function selectFull() {
+  ['gps','immo','alarm'].forEach(id=>{
+    S.pkgs[id]=true;
+    document.getElementById('psel-'+id).textContent='✓';
+    document.querySelectorAll('[data-pkg='+id+']').forEach(e=>e.classList.add('sel'));
+  });
+  document.getElementById('psel-full').textContent='✓';
+  document.querySelectorAll('[data-pkg=full]').forEach(e=>e.classList.add('sel'));
+  S.gpsTier='pro';
+  document.querySelectorAll('#tier-grid .tier-card').forEach(t=>t.classList.toggle('sel',t.dataset.tier==='pro'));
+  document.getElementById('pkg-warn').classList.add('hidden');
+}
+
+// ════════════════════════════════════════════════════════════
+// SECTIONS SETUP
+// ════════════════════════════════════════════════════════════
+function setupSections() {
+  ['gps','immo','alarm'].forEach(id => {
+    const el=document.getElementById('sec-'+id);
+    if(el) el.style.display = S.pkgs[id]?'block':'none';
+  });
+  const showSens = S.pkgs.alarm||S.pkgs.immo;
+  const ss=document.getElementById('sec-sensors');
+  if(ss) ss.style.display = showSens?'block':'none';
+  // Set sirens default
+  if(S.pkgs.alarm && S.qty.sirens===0) { S.qty.sirens=2; document.getElementById('q-sirens').textContent=2; }
+  updateSirenDisplay();
+  updateSelfInstallNote();
+}
+
+function toggleConf(hd, bdId) {
+  const bd = document.getElementById(bdId);
+  const chev = hd.querySelector('.conf-chev');
+  const isOpen = bd.style.display==='block';
+  bd.style.display = isOpen ? 'none' : 'block';
+  chev.classList.toggle('open', !isOpen);
+  hd.classList.toggle('is-open', !isOpen);
+}
+
+// ════════════════════════════════════════════════════════════
+// GPS
+// ════════════════════════════════════════════════════════════
+function selTier(el, tier) {
+  document.querySelectorAll('#tier-grid .tier-card').forEach(t=>t.classList.remove('sel'));
+  el.classList.add('sel');
+  S.gpsTier = tier;
+  updateSelfInstallNote();
+  updateCart();
+}
+
+function setBilling(mode) {
+  S.gpsBilling = mode;
+  document.getElementById('bt-monthly').classList.toggle('active', mode==='monthly');
+  document.getElementById('bt-yearly').classList.toggle('active', mode==='yearly');
+  document.getElementById('bt-note').style.display = mode==='yearly' ? 'inline' : 'none';
+  updateCart();
+}
+
+function selGpsInstall(mode) {
+  S.gpsInstall = mode;
+  document.getElementById('gi-pro').classList.toggle('on', mode==='pro');
+  document.getElementById('gi-pro').querySelector('.ochk').textContent = mode==='pro'?'✓':'';
+  document.getElementById('gi-self').classList.toggle('on', mode==='self');
+  document.getElementById('gi-self').querySelector('.ochk').textContent = mode==='self'?'✓':'';
+  updateCart();
+}
+
+function updateSelfInstallNote() {
+  const el = document.getElementById('self-install-opt');
+  if(el) el.style.display = S.gpsTier==='basic' ? 'flex' : 'none';
+  const selfOpt = document.getElementById('gi-self');
+  if(selfOpt) {
+    if(S.gpsTier !== 'basic') {
+      selfOpt.classList.add('disabled');
+      selfOpt.style.opacity='.4';
+      selfOpt.style.pointerEvents='none';
+      if(S.gpsInstall==='self') selGpsInstall('pro');
+    } else {
+      selfOpt.classList.remove('disabled');
+      selfOpt.style.opacity='1';
+      selfOpt.style.pointerEvents='auto';
+    }
+  }
+}
+
+// ════════════════════════════════════════════════════════════
+// OPTIONS
+// ════════════════════════════════════════════════════════════
+function togOpt(el, id, hw, inst, name) {
+  if(el.classList.contains('req')) return;
+  const was = el.classList.contains('on');
+  el.classList.toggle('on', !was);
+  el.querySelector('.ochk').textContent = was?'':'✓';
+  if(was) delete S.opts[id];
+  else S.opts[id] = {name, hw, inst};
+  updateCart();
+}
+
+function selImmo(type) {
+  document.getElementById('o-immo-a').classList.toggle('on', type==='analog');
+  document.getElementById('o-immo-a').querySelector('.ochk').textContent = type==='analog'?'✓':'';
+  document.getElementById('o-immo-c').classList.toggle('on', type==='can');
+  document.getElementById('o-immo-c').querySelector('.ochk').textContent = type==='can'?'✓':'';
+  S.immoType = type;
+  document.getElementById('brylok-sec').style.display = type==='can'?'block':'none';
+  const scImmo = document.getElementById('sc-immo');
+  if(scImmo) { scImmo.textContent = type ? 'Wybrano' : ''; scImmo.className = type ? 'tag tag-r' : ''; }
+  updateCart();
+}
+
+// ════════════════════════════════════════════════════════════
+// QUANTITIES
+// ════════════════════════════════════════════════════════════
+function chgQty(id, delta, e) {
+  e.stopPropagation();
+  const maxes = {sirens:4, cbw:10, cw:10, brylok:5, pir:6, glass:6};
+  S.qty[id] = Math.max(0, Math.min(maxes[id]||10, (S.qty[id]||0) + delta));
+  const el = document.getElementById('q-'+id); if(el) el.textContent = S.qty[id];
+  if(id==='sirens') updateSirenDisplay();
+  if(id==='cbw') { document.getElementById('pr-cbw').textContent=S.qty.cbw*P.cbw_hw+' zł'; const t=document.getElementById('tip-cbw');if(t)t.style.display=S.qty.cbw>=3?'block':'none'; }
+  if(id==='cw') document.getElementById('pr-cw').textContent=S.qty.cw*P.cw_hw+' zł';
+  if(id==='brylok') document.getElementById('pr-brylok').textContent=S.qty.brylok*P.brylok+' zł';
+  if(id==='pir') document.getElementById('pr-pir').textContent=S.qty.pir*P.pir_hw+' zł';
+  if(id==='glass') document.getElementById('pr-glass').textContent=S.qty.glass*P.glass_hw+' zł';
+  updateCart();
+}
+
+function updateSirenDisplay() {
+  const n = S.qty.sirens||0;
+  document.getElementById('pr-sirens').textContent = n*P.siren_hw+' zł';
+  document.getElementById('pr-siren-u').textContent = P.siren_hw;
+  document.getElementById('inst-siren-u').textContent = P.siren_inst;
+}
+
+// ════════════════════════════════════════════════════════════
+// INSTALLATION
+// ════════════════════════════════════════════════════════════
+function selInst(type) {
+  S.install.type = type;
+  document.getElementById('inst-w').classList.toggle('on', type==='workshop');
+  document.getElementById('inst-m').classList.toggle('on', type==='mobile');
+  document.getElementById('mob-calc').classList.toggle('hidden', type==='workshop');
+  if(type==='workshop') S.install.travelCost=0;
+  calcTravel(); updateCart();
+}
+
+function calcTravel() {
+  if(S.install.type!=='mobile') return;
+  const km = parseInt(document.getElementById('km-input')?.value||0)||0;
+  S.install.km = km;
+  const cost = km>0 ? Math.round(km*2*P.km_rate + P.travel_h*P.hourly_rate) : Math.round(P.travel_h*P.hourly_rate);
+  S.install.travelCost = cost;
+  const r = document.getElementById('travel-res');
+  if(r) r.textContent = km>0 ? `≈ ${fmt(cost)} (szacunek)` : '';
+  updateCart();
+}
+
+// ════════════════════════════════════════════════════════════
+// CALCULATION – no price from pkg tiles
+// ════════════════════════════════════════════════════════════
+function calcTotals() {
+  let hw=0, inst=0;
+  const lines = [];
+  const nv = Math.max(1, window.S_vehCount||1);
+  const {gps, immo, alarm} = S.pkgs;
+
+  // Unit – determined by combo, NOT visible to client
+  let uHw=0, uIn=0, uN='';
+  if(gps && (alarm||immo)) { uHw=P.unit_pro; uIn=P.unit_pro_inst; uN='Jednostka telematyczna 4G LTE + CAN'; }
+  else if(gps && S.gpsTier==='promax') { uHw=P.unit_promax; uIn=P.unit_promax_inst; uN='Jednostka GPS Pro Max 4G'; }
+  else if(gps && S.gpsTier==='pro') { uHw=P.unit_pro; uIn=P.unit_pro_inst; uN='Jednostka GPS Pro 4G LTE + CAN'; }
+  else if(gps) { uHw=P.unit_basic; uIn=S.gpsInstall==='self'?0:P.unit_basic_inst; uN='Jednostka GPS Basic 4G LTE'; }
+  else if(alarm||immo) { uHw=P.unit_basic; uIn=P.unit_basic_inst; uN='Jednostka 4G LTE'; }
+
+  if(uHw>0) {
+    hw+=uHw*nv; inst+=uIn*nv;
+    lines.push({name:uN+(nv>1?` × ${nv}`:''), hw:uHw*nv, inst:uIn*nv});
+  }
+
+  // Immobilizer
+  if(immo && S.immoType==='analog') {
+    hw+=P.immo_analog*nv;
+    lines.push({name:'Immobilizer analogowy'+(nv>1?` × ${nv}`:''), hw:P.immo_analog*nv, inst:0});
+  } else if(immo && S.immoType==='can') {
+    hw+=P.immo_can*nv; inst+=P.immo_can_inst*nv;
+    lines.push({name:'Immobilizer CAN + montaż + brylok'+(nv>1?` × ${nv}`:''), hw:P.immo_can*nv, inst:P.immo_can_inst*nv});
+  }
+  if(S.qty.brylok>0) {
+    hw+=P.brylok*S.qty.brylok;
+    lines.push({name:`Brylok elektroniczny × ${S.qty.brylok}`, hw:P.brylok*S.qty.brylok, inst:0});
+  }
+
+  // Alarm
+  if(alarm) {
+    hw+=P.alarm_hw*nv; inst+=P.alarm_inst*nv;
+    lines.push({name:'Alarm CAN'+(nv>1?` × ${nv}`:''), hw:P.alarm_hw*nv, inst:P.alarm_inst*nv});
+    if(S.qty.sirens>0) {
+      const sh=P.siren_hw*S.qty.sirens*nv, si=P.siren_inst*S.qty.sirens*nv;
+      hw+=sh; inst+=si;
+      lines.push({name:`Syreny piezo × ${S.qty.sirens*nv}`, hw:sh, inst:si});
+    }
+  }
+
+  // Contacts
+  if(S.qty.cbw>0) { hw+=P.cbw_hw*S.qty.cbw*nv; inst+=P.cbw_inst*S.qty.cbw*nv; lines.push({name:`Kontaktrony bezprzew. × ${S.qty.cbw*nv}`, hw:P.cbw_hw*S.qty.cbw*nv, inst:P.cbw_inst*S.qty.cbw*nv}); }
+  if(S.qty.cw>0) { hw+=P.cw_hw*S.qty.cw*nv; inst+=P.cw_inst*S.qty.cw*nv; lines.push({name:`Kontaktrony kablowe × ${S.qty.cw*nv}`, hw:P.cw_hw*S.qty.cw*nv, inst:P.cw_inst*S.qty.cw*nv}); }
+  if(S.qty.pir>0) { hw+=P.pir_hw*S.qty.pir*nv; inst+=P.pir_inst*S.qty.pir*nv; lines.push({name:`PIR wewnętrzny × ${S.qty.pir*nv}`, hw:P.pir_hw*S.qty.pir*nv, inst:P.pir_inst*S.qty.pir*nv}); }
+  if(S.qty.glass>0) { hw+=P.glass_hw*S.qty.glass*nv; inst+=P.glass_inst*S.qty.glass*nv; lines.push({name:`Czujnik zbicia szyby × ${S.qty.glass*nv}`, hw:P.glass_hw*S.qty.glass*nv, inst:P.glass_inst*S.qty.glass*nv}); }
+
+  // Options (sensors etc.)
+  const optPriceMap = {
+    gas:{hw:P.gas_hw,inst:P.gas_inst}, temp:{hw:P.temp_hw,inst:P.temp_inst},
+    pirext:{hw:P.pirext_hw,inst:P.pirext_inst}, tow:{hw:P.tow_hw,inst:P.tow_inst},
+    camera:{hw:P.camera_hw,inst:P.camera_inst},
+    eyesensor:{hw:P.eyesensor_hw,inst:P.eyesensor_inst},
+    antijam:{hw:P.antijam_hw,inst:P.antijam_inst},
+    'immo-siren':{hw:P.siren_hw,inst:P.siren_inst},
+    'immo-existing':{hw:0,inst:P.existing_inst},
+    strobe:{hw:0,inst:P.strobe_inst},
+    smoke:{hw:0,inst:0},
+  };
+  Object.entries(S.opts).forEach(([id, v]) => {
+    const op = optPriceMap[id]; if(!op) return;
+    if(op.hw===0&&op.inst===0) { lines.push({name:v.name+' (wycena indyw.)', hw:0, inst:0, ask:true}); return; }
+    hw+=op.hw*nv; inst+=op.inst*nv;
+    lines.push({name:v.name+(nv>1?` × ${nv}`:''), hw:op.hw*nv, inst:op.inst*nv});
+  });
+
+  const travel = S.install.travelCost||0;
+  const subMap = {basic:P.sub_basic, pro:P.sub_pro, promax:P.sub_promax};
+  const monthly = gps ? (subMap[S.gpsTier]||P.sub_basic) : 0;
+  const yearlyMonthly = monthly*11; // 11+1 gratis
+
+  return {hw, inst, travel, total:hw+inst+travel, lines, nv, monthly, yearlyMonthly};
+}
+
+function fmt(n) { return Math.round(n).toLocaleString('pl-PL')+' zł'; }
+
+// ════════════════════════════════════════════════════════════
+// CART UPDATE
+// ════════════════════════════════════════════════════════════
+function updateCart() {
+  const {hw, inst, travel, total, lines, monthly, yearlyMonthly} = calcTotals();
+  const hasPlat = S.pkgs.gps && monthly>0;
+  const cnt = lines.length + (hasPlat?1:0);
+
+  document.getElementById('cart-cnt').textContent = cnt+' elem.';
+  document.getElementById('cart-empty').style.display = cnt===0?'block':'none';
+  document.getElementById('cart-lines').style.display = cnt===0?'none':'block';
+
+  const hwEl = document.getElementById('cart-hw');
+  hwEl.innerHTML = '';
+  if(lines.length>0) {
+    hwEl.innerHTML = '<div class="cst">Sprzęt i usługi</div>';
+    lines.forEach(l => {
+      if(l.ask) {
+        hwEl.innerHTML += `<div class="cl"><span class="cln">${l.name}</span><span class="clp" style="color:var(--amber);font-size:.68rem;font-style:italic">wycena</span></div>`;
+      } else if(l.hw>0||l.inst>0) {
+        hwEl.innerHTML += `<div class="cl"><span class="cln">${l.name}</span><span class="clp">${fmt(l.hw)}</span></div>`;
+      }
+    });
+    hwEl.innerHTML += `<div class="cl"><span class="cln muted">+ Montaż łącznie</span><span class="clp muted">${fmt(inst)}</span></div>`;
+  }
+
+  const pEl = document.getElementById('cart-plat');
+  if(hasPlat) {
+    const platLabel = S.gpsBilling==='yearly' ? `${yearlyMonthly} zł/rok (11+1 gratis)` : `od ${monthly} zł/mies.`;
+    pEl.innerHTML = `<div class="cst">Platforma EVTelematix GPS ${S.gpsTier.toUpperCase()}</div><div class="cl"><span class="cln">Abonament ${S.gpsBilling==='yearly'?'roczny':'miesięczny'}</span><span class="clp">${platLabel}</span></div>`;
+    document.getElementById('sub-plat-row').classList.remove('hidden');
+    document.getElementById('sub-plat').textContent = platLabel;
+  } else { pEl.innerHTML=''; document.getElementById('sub-plat-row').classList.add('hidden'); }
+
+  if(travel>0) { document.getElementById('sub-travel-row').classList.remove('hidden'); document.getElementById('sub-travel').textContent=fmt(travel); }
+  else document.getElementById('sub-travel-row').classList.add('hidden');
+
+  document.getElementById('sub-hw').textContent = fmt(hw);
+  document.getElementById('sub-inst').textContent = fmt(inst);
+  document.getElementById('cart-total').textContent = fmt(total);
+  document.getElementById('cart-total-sub').textContent = hasPlat ? `+ ${S.gpsBilling==='yearly'?`${yearlyMonthly} zł/rok`:`od ${monthly} zł/mies.`} (platforma)` : '';
+}
+
+// ════════════════════════════════════════════════════════════
+// SUMMARY
+// ════════════════════════════════════════════════════════════
+function buildSummary() {
+  const {hw, inst, travel, total, lines, nv, monthly, yearlyMonthly} = calcTotals();
+  const f = id => document.getElementById(id)?.value||'';
+  const fname=f('l-fname'), lname=f('l-lname'), phone=f('l-phone'), email=f('l-email');
+  const company=f('l-company'), city=f('l-city'), nip=f('l-nip'), notes=f('c-notes'), date=f('pref-date');
+  const pkgNames=[]; if(S.pkgs.gps)pkgNames.push('GPS '+S.gpsTier.toUpperCase()); if(S.pkgs.immo)pkgNames.push('Immobilizer'); if(S.pkgs.alarm)pkgNames.push('Alarm CAN');
+  const savings = total>0 ? Math.round(total*0.3/12) : 0;
+  const saveYears = savings>0 ? Math.max(1, Math.ceil(total/(savings*12))) : 0;
+  const qn = 'EVT-'+Date.now().toString(36).toUpperCase().slice(-8);
+
+  // Save lead
+  try {
+    const leads = JSON.parse(localStorage.getItem('evt_leads_v6')||'[]');
+    leads.push({ts:new Date().toISOString(),fname,lname,phone,email,company,city,total,pkgs:pkgNames.join('+'),veh:window.S_vehCount});
+    localStorage.setItem('evt_leads_v6', JSON.stringify(leads.slice(-50)));
+  } catch(e) {}
+
+  let html = `
+  <div class="sum-hero">
+    <div class="sh-label">Wycena · ${qn} · ${new Date().toLocaleDateString('pl-PL')}</div>
+    <div class="sh-total">${fmt(total)}</div>
+    <div class="sh-sub">Sprzęt + montaż${travel>0?' + dojazd (szac.)':''} · ceny netto PLN · ważna 30 dni</div>
+  </div>
+  <div class="sum-sec">
+    <div class="sum-sec-title">Klient</div>
+    <div class="sum-line"><span class="sum-name">Imię i nazwisko</span><span class="sum-price">${fname} ${lname}</span></div>
+    <div class="sum-line"><span class="sum-name">Telefon</span><span class="sum-price">${phone}</span></div>
+    <div class="sum-line"><span class="sum-name">E-mail</span><span class="sum-price">${email}</span></div>
+    ${company?`<div class="sum-line"><span class="sum-name">Firma</span><span class="sum-price">${company}${nip?' · NIP: '+nip:''}</span></div>`:''}
+    <div class="sum-line"><span class="sum-name">Miejscowość</span><span class="sum-price">${city}</span></div>
+    <div class="sum-line"><span class="sum-name">Liczba pojazdów</span><span class="sum-price">${window.S_vehCount} szt.</span></div>
+  </div>
+  <div class="sum-sec">
+    <div class="sum-sec-title">Pakiet: ${pkgNames.join(' + ')}</div>
+    ${lines.map(l=>l.ask
+      ? `<div class="sum-line"><span class="sum-name">${l.name}</span><span class="sum-price" style="color:var(--amber);font-style:italic">wycena indyw.</span></div>`
+      : l.hw>0||l.inst>0
+        ? `<div class="sum-line"><span class="sum-name">${l.name}</span><span class="sum-price">${fmt(l.hw)}<br><span class="sum-muted">+ ${fmt(l.inst)} montaż</span></span></div>`
+        : ''
+    ).join('')}
+  </div>
+  ${S.pkgs.gps?`<div class="sum-sec"><div class="sum-sec-title">Platforma EVTelematix GPS ${S.gpsTier.toUpperCase()}</div>
+    <div class="sum-line"><span class="sum-name">Abonament ${S.gpsBilling==='yearly'?'roczny (11 mies. + 1 gratis)':'miesięczny'}</span><span class="sum-price">${S.gpsBilling==='yearly'?yearlyMonthly+' zł/rok':'od '+monthly+' zł/mies.'}</span></div>
+    <div class="sum-line"><span class="sum-name">Karta SIM IoT</span><span class="sum-price">wliczona w abonament</span></div>
+  </div>`:''}
+  <div class="sum-sec">
+    <div class="sum-sec-title">Instalacja: ${S.install.type==='workshop'?'Warsztat':'Dojazd do klienta'}</div>
+    <div class="sum-line"><span class="sum-name">Sprzęt łącznie</span><span class="sum-price">${fmt(hw)}</span></div>
+    <div class="sum-line"><span class="sum-name">Montaż i uruchomienie</span><span class="sum-price">${fmt(inst)}</span></div>
+    ${travel>0?`<div class="sum-line"><span class="sum-name">Dojazd szacunkowy (${S.install.km} km × 2 str., 2 zł/km brutto)</span><span class="sum-price">${fmt(travel)}</span></div>`:''}
+    <div class="sum-line"><span class="sum-name">Termin montażu</span><span class="sum-price">${date||'Do uzgodnienia – skontaktuje się instalator'}</span></div>
+  </div>
+  <div class="sum-sec" style="background:var(--navy2);border-color:var(--steel)">
+    <div style="display:flex;justify-content:space-between;align-items:center">
+      <div style="color:#64748B;font-size:.75rem;font-family:'Syne',sans-serif;text-transform:uppercase;letter-spacing:.06em">Razem jednorazowo (netto)</div>
+      <div style="font-family:'Syne',sans-serif;font-size:1.4rem;font-weight:800;color:var(--gold)">${fmt(total)}</div>
+    </div>
+    <div style="font-size:.65rem;color:#475569;text-align:right;margin-top:.15rem">Ceny netto PLN</div>
+  </div>
+  ${savings>0?`<div class="sav-box">
+    <div style="font-size:.71rem;color:var(--green);font-weight:500;margin-bottom:.2rem">Pomagamy w uzyskaniu zniżki na ubezpieczenie OC/AC – do 30%</div>
+    <div class="sav-v">≈ ${fmt(savings)}/mies. oszczędności*</div>
+    <div class="sav-note">Przy obniżce składki o 30% system może zwrócić się po ok. ${saveYears} roku*<br>*Wysokość zniżki zależy od indywidualnej oferty ubezpieczyciela – nie jest gwarantowana.</div>
+  </div>`:''}
+  ${notes?`<div class="al info"><span>ℹ</span><div><strong>Uwagi:</strong> ${notes}</div></div>`:''}
+  <div style="font-size:.68rem;color:var(--muted);text-align:center;line-height:1.7;margin-top:.45rem">
+    Wycena nr ${qn} · Ceny netto PLN · Ważna 30 dni · Wycena orientacyjna<br>
+    Finalna cena po bezpłatnej diagnozie pojazdu<br>
+    EVTelematix · +48 516 956 809 · info@evtelematix.com · <a href="https://evtelematix.pl" style="color:var(--blue)">evtelematix.pl</a>
+  </div>`;
+
+  document.getElementById('summary-content').innerHTML = html;
+}
+
+function sendEmail() {
+  const f = id => document.getElementById(id)?.value||'';
+  const {hw, inst, travel, total, lines, monthly} = calcTotals();
+  const sub = encodeURIComponent(`Wycena EVTelematix – ${f('l-fname')} ${f('l-lname')}`);
+  const body = encodeURIComponent([
+    'WYCENA SYSTEMU ZABEZPIECZEŃ – EVTelematix','='.repeat(48),'',
+    `Klient: ${f('l-fname')} ${f('l-lname')}`,`Tel: ${f('l-phone')}`,`Email: ${f('l-email')}`,
+    f('l-company')?`Firma: ${f('l-company')}${f('l-nip')?' NIP: '+f('l-nip'):''}` : '',
+    `Miejscowość: ${f('l-city')}`,`Pojazdów: ${window.S_vehCount}`,
+    '','KOMPONENTY:',
+    ...lines.map(l=>l.ask?`  • ${l.name}: WYCENA INDYWIDUALNA`:`  • ${l.name}: ${l.hw} zł + ${l.inst} zł montaż`),
+    '','PODSUMOWANIE:',`  Sprzęt: ${hw} zł`,`  Montaż: ${inst} zł`,
+    travel>0?`  Dojazd: ${travel} zł`:'',`  RAZEM: ${total} zł netto`,
+    S.pkgs.gps?`  Platforma GPS ${S.gpsTier.toUpperCase()}: ${S.gpsBilling==='yearly'?monthly*11+' zł/rok':'od '+monthly+' zł/mies.'}`:'',
+    `  Instalacja: ${S.install.type==='workshop'?'Warsztat':'Dojazd – '+S.install.loc}`,
+    f('c-notes')?`  Uwagi: ${f('c-notes')}`:'',
+    '','EVTelematix · +48 516 956 809 · info@evtelematix.com · evtelematix.pl',
+  ].filter(Boolean).join('\n'));
+  window.location.href = `mailto:info@evtelematix.com?cc=${encodeURIComponent(f('l-email'))}&subject=${sub}&body=${body}`;
+}
+
+// ════════════════════════════════════════════════════════════
+// RESET
+// ════════════════════════════════════════════════════════════
+function resetAll() {
+  if(!confirm('Wyczyścić całą konfigurację?')) return;
+  ['gps','immo','alarm'].forEach(id=>{S.pkgs[id]=false;document.getElementById('psel-'+id).textContent='';document.querySelectorAll('[data-pkg='+id+']').forEach(e=>e.classList.remove('sel'));});
+  document.getElementById('psel-full').textContent='';
+  document.querySelectorAll('[data-pkg=full]').forEach(e=>e.classList.remove('sel'));
+  S.opts={};
+  document.querySelectorAll('.oc.on:not(.req)').forEach(el=>{el.classList.remove('on');const c=el.querySelector('.ochk');if(c)c.textContent='';});
+  S.qty={sirens:2,cbw:0,cw:0,brylok:0,pir:0,glass:0};
+  ['q-sirens','q-cbw','q-cw','q-brylok','q-pir','q-glass'].forEach(id=>{const el=document.getElementById(id);if(el)el.textContent=id==='q-sirens'?'2':'0';});
+  S.immoType=null;
+  S.gpsTier='basic'; S.gpsBilling='monthly'; S.gpsInstall='pro';
+  document.querySelectorAll('#tier-grid .tier-card').forEach(t=>t.classList.toggle('sel',t.dataset.tier==='basic'));
+  S.install={type:'workshop',km:0,loc:'',travelCost:0};
+  window.S_vehCount=1;
+  const vc=document.getElementById('vc-input');if(vc)vc.value=1;
+  gotoStep(0); updateCart();
+}
+
+// ════════════════════════════════════════════════════════════
+// ADMIN PANEL
+// ════════════════════════════════════════════════════════════
+const ADM_PASS='EVT2025';
+let admLogged=false, lc=0;
+document.getElementById('logo-home')?.addEventListener('click',()=>{lc++;setTimeout(()=>lc=0,1500);if(lc>=5){lc=0;document.getElementById('adm-trigger').classList.add('show');openAdmin();}});
+function openAdmin(){document.getElementById('adm-overlay').classList.add('show');if(!admLogged){document.getElementById('adm-login').style.display='block';document.getElementById('adm-content').style.display='none';setTimeout(()=>document.getElementById('adm-pass')?.focus(),100);}else renderAdmin();}
+function closeAdmin(){document.getElementById('adm-overlay').classList.remove('show');}
+function doLogin(){const p=document.getElementById('adm-pass').value;if(p===ADM_PASS){admLogged=true;document.getElementById('adm-login').style.display='none';document.getElementById('adm-content').style.display='block';renderAdmin();}else{document.getElementById('login-err').classList.remove('hidden');document.getElementById('adm-pass').value='';}}
+
+function renderAdmin() {
+  const grps = {
+    'Jednostki GPS i abonament':['unit_basic','unit_basic_inst','unit_pro','unit_pro_inst','unit_promax','unit_promax_inst','sub_basic','sub_pro','sub_promax'],
+    'Immobilizer':['immo_analog','immo_can','immo_can_inst','brylok'],
+    'Alarm i syreny':['alarm_hw','alarm_inst','siren_hw','siren_inst','strobe_inst'],
+    'Anti-Jamming':['antijam_hw','antijam_inst'],
+    'Kontaktrony (Elmes)':['cbw_hw','cbw_inst','cw_hw','cw_inst'],
+    'Czujniki (Elmes + inne)':['pir_hw','pir_inst','pirext_hw','pirext_inst','glass_hw','glass_inst','gas_hw','gas_inst','temp_hw','temp_inst','tow_hw','tow_inst','eyesensor_hw','eyesensor_inst'],
+    'Opcje Pro':['camera_hw','camera_inst','immo_siren_hw','immo_siren_inst','existing_inst'],
+    'Dojazd':['km_rate','hourly_rate','travel_h'],
+  };
+
+  let html = '<div style="font-size:.75rem;color:var(--muted);margin-bottom:.85rem">Pozycje <span style="background:#EEF4FF;color:var(--blue);padding:.1rem .35rem;border-radius:3px;font-weight:600">niebieskie</span> są aktywnie używane w kalkulatorze.</div>';
+
+  Object.entries(grps).forEach(([g, keys]) => {
+    html += `<div class="adm-sec">${g}</div>`;
+    html += '<table class="ptable"><thead><tr><th>Element</th><th>Zakup (ref.)</th><th>Cena klienta (zł)</th><th>Marża %</th><th>Marża zł</th></tr></thead><tbody>';
+    keys.forEach(k => {
+      const isCalc = IN_CALC.has(k);
+      const buyRef = BUY_PRICES[k] || 0;
+      const clientPrice = P[k]||0;
+      const marginPct = buyRef>0&&clientPrice>0 ? Math.round((clientPrice-buyRef)/clientPrice*100) : 0;
+      const marginZl = buyRef>0&&clientPrice>0 ? Math.round(clientPrice-buyRef) : 0;
+      const marginColor = marginPct>50?'var(--green)':marginPct>25?'var(--amber)':'var(--red)';
+      html += `<tr${isCalc?' class="in-calc"':''}>
+        <td>${LABELS[k]||k}</td>
+        <td style="color:var(--muted);font-size:.7rem">${buyRef>0?buyRef+' zł':'—'}</td>
+        <td><input class="pinput" type="number" id="ap-${k}" value="${clientPrice}" min="0" step="1" oninput="recalcMargin('${k}',${buyRef})"></td>
+        <td><span class="margin-val" id="mpct-${k}" style="color:${marginColor}">${marginPct>0?marginPct+'%':'—'}</span></td>
+        <td><span class="margin-val" id="mzl-${k}" style="color:${marginColor}">${marginZl>0?'+'+marginZl+' zł':'—'}</span></td>
+      </tr>`;
+    });
+    html += '</tbody></table>';
+  });
+
+  // Teltonika full catalog
+  html += `<div class="adm-sec">Teltonika – pełny cennik urządzeń</div>
+  <table class="ptable"><thead><tr><th>Model</th><th>1 szt.</th><th>Hurt (próg)</th><th>Uwagi</th></tr></thead><tbody>
+  <tr class="in-calc"><td>FTC880</td><td>46 EUR (~200 zł)</td><td>43 EUR (233 szt.) / 42 EUR (715 szt.)</td><td>4G LTE · od VII 2025</td></tr>
+  <tr class="in-calc"><td>FTC881</td><td>47 EUR</td><td>42 EUR (1000 szt.)</td><td>Wersja 10–90V DC</td></tr>
+  <tr class="in-calc"><td>FTC305</td><td>69 EUR (~300 zł)</td><td>63 EUR (159 szt.) / 61 EUR (492 szt.)</td><td>Tracker CAN 10–90V</td></tr>
+  <tr><td>FMC880</td><td>50 EUR / 261,61 zł</td><td>46 EUR (218) / 44 EUR (682)</td><td>Jednostka standard</td></tr>
+  <tr><td>FMB920</td><td>22 EUR / 103,94 zł</td><td>22 EUR (86 szt.)</td><td>Tracker 2G ekonomiczny</td></tr>
+  <tr><td>FMB900</td><td>FMB920 − 1 EUR</td><td>—</td><td>Bez info zaniku zasilania</td></tr>
+  <tr><td>ATC700</td><td>55 EUR (sample) / 48 EUR (2 szt.)</td><td>—</td><td>Cena dla EVTelematix</td></tr>
+  <tr><td>FMT100</td><td>—</td><td>31,60 EUR (580 szt.)</td><td>Przetarg PGE Dystrybucja</td></tr>
+  </tbody></table>`;
+
+  html += `<div class="adm-sec">Teltonika – karty SIM IoT</div>
+  <table class="ptable"><thead><tr><th>Produkt</th><th>Cena zakupu</th><th>Doładowanie</th><th>Zasięg / ważność</th><th>MOQ</th></tr></thead><tbody>
+  <tr class="in-calc"><td>SIM Global (500MB)</td><td>11 EUR</td><td>11 EUR</td><td>135 krajów / 5 lat</td><td>10 szt.</td></tr>
+  <tr class="in-calc"><td>SIM Global Lite (100MB)</td><td>5 EUR</td><td>4 EUR</td><td>45 krajów / 1 rok</td><td>10 szt.</td></tr>
+  </tbody></table>`;
+
+  html += `<div class="adm-sec">Teltonika – akcesoria i kable</div>
+  <table class="ptable"><thead><tr><th>Produkt</th><th>Cena</th><th>Uwagi</th></tr></thead><tbody>
+  <tr class="in-calc"><td>Relay z podstawką 12V</td><td>2,50 EUR (MOQ 10)</td><td>Do immobilizera analogowego</td></tr>
+  <tr><td>Kabel U-type</td><td>3,00 EUR</td><td>Do FMx9x0 pod baterię</td></tr>
+  <tr><td>Kabel z bezpiecznikiem (FMx9)</td><td>3,00 / 2,50 EUR (10+)</td><td>Main connector</td></tr>
+  <tr><td>Uchwyt magnetyczny TAT1YX</td><td>7,00 EUR (10+)</td><td>Do TAT140, bez tamper</td></tr>
+  <tr class="in-calc"><td>Wtyczka TACHO (Cable)</td><td>10,00 EUR</td><td>Tachograf</td></tr>
+  <tr class="in-calc"><td>Wtyczka FMS (Cable)</td><td>10,00 EUR</td><td>FMS magistrala</td></tr>
+  </tbody></table>`;
+
+  html += `<div class="adm-sec" style="color:var(--green)">SEO Electronics – immobilizery CAN</div>
+  <table class="ptable"><thead><tr><th>Model</th><th>P/N</th><th>Cena netto</th><th>Opis</th></tr></thead><tbody>
+  <tr class="in-calc"><td>SEO CANi U335_76_10</td><td>78761001</td><td>301,50 zł</td><td>CAN immobilizer z PIN</td></tr>
+  <tr class="in-calc"><td>SEO CANi U335_76_05</td><td>78760504</td><td>301,50 zł</td><td>CAN do GPS/GSM bez PIN</td></tr>
+  <tr class="in-calc"><td>CANblu II + 2 breloki U335_77_A2</td><td>7977A267</td><td>531,50 zł</td><td>CAN Bluetooth standardowy</td></tr>
+  <tr><td>CANblu II + 2 breloki U335_77_A1</td><td>7977A181</td><td>531,50 zł</td><td>CAN Bluetooth zwykły</td></tr>
+  <tr><td>CANblu I + 1 brelok U335_77_A2</td><td>7977A264</td><td>466,50 zł</td><td>CANblu standardowy</td></tr>
+  <tr><td>CANblu I + 1 brelok U335_77_A1</td><td>7977A180</td><td>466,50 zł</td><td>CANblu zwykły</td></tr>
+  <tr><td>CANblu bez breloków U335_77_A2</td><td>7977A261</td><td>401,50 zł</td><td>Bez breloków standardowy</td></tr>
+  <tr><td>CANblu bez breloków U335_77_A1</td><td>7977A179</td><td>401,50 zł</td><td>Bez breloków zwykły</td></tr>
+  <tr><td>Programming Interface</td><td>02000001</td><td>110,00 zł</td><td>Programator uniwersalny</td></tr>
+  <tr><td>Programming Interface Cable</td><td>02000057</td><td>16,00 zł</td><td>Kabel do CANi i CANblu</td></tr>
+  <tr class="in-calc"><td>SEO ID Transmitter (brelok)</td><td>01000001</td><td>65,00 zł</td><td>Brelok osobno</td></tr>
+  <tr><td>SEO CANtouch</td><td>19444001</td><td>84,00 zł</td><td>—</td></tr>
+  <tr><td>SEO CANlog</td><td>—</td><td>B/D</td><td>Konwerter – cena do ustalenia</td></tr>
+  </tbody></table>`;
+
+  html += `<div class="adm-sec" style="color:var(--amber)">Elmes Elektronik – czujniki (ceny hurt netto)</div>
+  <table class="ptable"><thead><tr><th>Kod</th><th>Opis</th><th>Hurt netto</th><th>Detal netto</th></tr></thead><tbody>
+  <tr class="in-calc"><td>PTX50</td><td>PIR bezprzewodowy 100m</td><td>79,00 zł</td><td>89,00 zł</td></tr>
+  <tr class="in-calc"><td>GBX1</td><td>Czujnik zbicia szyby bezprzew. 100m</td><td>109,20 zł</td><td>139,10 zł</td></tr>
+  <tr class="in-calc"><td>CTX5</td><td>Kontaktron magnetyczny bezprzew. biały 100m</td><td>54,60 zł</td><td>67,90 zł</td></tr>
+  <tr><td>CTX5B</td><td>Kontaktron magnetyczny bezprzew. brązowy</td><td>54,60 zł</td><td>67,90 zł</td></tr>
+  <tr><td>CTX3H</td><td>Kontaktron magnetyczny bezprzew. biały</td><td>48,90 zł</td><td>62,40 zł</td></tr>
+  <tr><td>CTX5D</td><td>Kontaktron magnetyczny bezprzew. biały</td><td>60,10 zł</td><td>74,60 zł</td></tr>
+  <tr><td>MTS 166</td><td>Detektor dymu bezprzewodowy 50m</td><td>67,00 zł</td><td>85,00 zł</td></tr>
+  <tr class="in-calc"><td>WSS</td><td>Sygnalizator optyczno-akustyczny bezprzew. 100m</td><td>193,00 zł</td><td>240,00 zł</td></tr>
+  <tr><td>WSM</td><td>Moduł sterujący WSS</td><td>80,10 zł</td><td>102,40 zł</td></tr>
+  <tr><td>GSM2000LTE</td><td>Moduł powiadomień GSM 4G/2G</td><td>238,50 zł</td><td>302,10 zł</td></tr>
+  <tr><td>CB32 GN/GZ/GB</td><td>Centrala alarmowa bezprzew. z GSM LCD</td><td>262,60 zł</td><td>328,30 zł</td></tr>
+  <tr><td>CR123A</td><td>Bateria litowa 3V do CTX5, PTX50</td><td>8,10 zł</td><td>9,80 zł</td></tr>
+  </tbody></table>`;
+
+  html += `<div class="adm-sec">Stawki instalatorów zewnętrznych – Moto-Master (ref.)</div>
+  <div style="font-size:.72rem;color:var(--muted);margin-bottom:.6rem">Kontakt: MASTER.MOTO.77@GMAIL.COM · 889-353-576 · NIP: 7773439925</div>
+  <table class="ptable"><thead><tr><th>Usługa</th><th>Stawka rynkowa</th><th>Twój koszt inst. zewn.</th></tr></thead><tbody>
+  <tr><td>Podłączenie GPS do zasilania (Basic)</td><td>120–150 zł</td><td><input class="pinput" id="ap-inst_basic" value="150" type="number"> zł</td></tr>
+  <tr><td>Podłączenie GPS + CAN (Pro)</td><td>180–250 zł</td><td><input class="pinput" id="ap-inst_can" value="220" type="number"> zł</td></tr>
+  <tr><td>GPS + CAN + Tachograf (Pro Max)</td><td>260–300 zł</td><td><input class="pinput" id="ap-inst_tacho" value="280" type="number"> zł</td></tr>
+  <tr><td>Montaż przekaźnika immobilizer</td><td>30–50 zł</td><td><input class="pinput" id="ap-inst_relay" value="50" type="number"> zł</td></tr>
+  <tr><td>Montaż immobilizera CAN</td><td>wycena indyw.</td><td><input class="pinput" id="ap-inst_immo_can" value="250" type="number"> zł</td></tr>
+  <tr><td>Montaż czujnika (per szt.)</td><td>30–60 zł</td><td><input class="pinput" id="ap-inst_sensor" value="45" type="number"> zł</td></tr>
+  <tr><td>Dojazd instalatora (zł/km)</td><td>2 zł brutto</td><td><input class="pinput" id="ap-inst_km" value="2" type="number"> zł</td></tr>
+  </tbody></table>`;
+
+  // Leads
+  try {
+    const leads = JSON.parse(localStorage.getItem('evt_leads_v6')||'[]');
+    if(leads.length>0) {
+      html += `<div class="adm-sec">Zapytania (${leads.length}) – ostatnie 20</div>`;
+      html += '<table class="ptable"><thead><tr><th>Data</th><th>Klient</th><th>Tel</th><th>Miasto</th><th>Pojazdy</th><th>Razem</th><th>Pakiet</th></tr></thead><tbody>';
+      leads.slice(-20).reverse().forEach(l=>{
+        html += `<tr><td>${new Date(l.ts).toLocaleDateString('pl-PL')}</td><td>${l.fname||''} ${l.lname||''}</td><td><a href="tel:${l.phone}">${l.phone||''}</a></td><td>${l.city||''}</td><td>${l.veh||1}</td><td>${l.total?Math.round(l.total).toLocaleString('pl-PL')+' zł':'—'}</td><td>${l.pkgs||''}</td></tr>`;
+      });
+      html += '</tbody></table>';
+    }
+  } catch(e){}
+
+  html += `<div class="adm-actions">
+    <button class="adm-save" onclick="saveP()">Zapisz ceny</button>
+    <button class="adm-reset" onclick="if(confirm('Przywrócić domyślne?'))resetP()">Domyślne</button>
+    <button class="adm-reset" style="color:var(--muted);border-color:var(--border)" onclick="if(confirm('Wyczyścić leady?')){localStorage.removeItem('evt_leads_v6');renderAdmin()}">Wyczyść leady</button>
+  </div>`;
+
+  document.getElementById('adm-content').innerHTML = html;
+}
+
+function recalcMargin(k, buyRef) {
+  const el = document.getElementById('ap-'+k);
+  if(!el) return;
+  const clientPrice = parseFloat(el.value)||0;
+  const marginPct = buyRef>0&&clientPrice>0 ? Math.round((clientPrice-buyRef)/clientPrice*100) : 0;
+  const marginZl = buyRef>0&&clientPrice>0 ? Math.round(clientPrice-buyRef) : 0;
+  const color = marginPct>50?'var(--green)':marginPct>25?'var(--amber)':'var(--red)';
+  const mp=document.getElementById('mpct-'+k);if(mp){mp.textContent=marginPct>0?marginPct+'%':'—';mp.style.color=color;}
+  const mz=document.getElementById('mzl-'+k);if(mz){mz.textContent=marginZl>0?'+'+marginZl+' zł':'—';mz.style.color=color;}
+}
+
+function saveP() {
+  const n={};
+  Object.keys(DEF).forEach(k=>{const el=document.getElementById('ap-'+k);if(el)n[k]=parseFloat(el.value)||0;});
+  P={...n};localStorage.setItem('evt_p_v6',JSON.stringify(P));
+  refreshDisplays();alert('Ceny zapisane!');
+}
+function resetP() { P={...DEF};localStorage.removeItem('evt_p_v6');renderAdmin();refreshDisplays();alert('Przywrócono domyślne.'); }
+
+// ════════════════════════════════════════════════════════════
+// REFRESH DISPLAYS
+// ════════════════════════════════════════════════════════════
+function refreshDisplays() {
+  const s=(id,v)=>{const el=document.getElementById(id);if(el)el.textContent=v;};
+  s('pr-immo-a', P.immo_analog+' zł');
+  s('pr-immo-c', (P.immo_can+P.immo_can_inst).toLocaleString('pl-PL')+' zł');
+  s('pr-alarm-base', (P.alarm_hw+P.alarm_inst).toLocaleString('pl-PL')+' zł');
+  s('pr-antijam', P.antijam_hw+' zł');
+  s('inst-antijam', P.antijam_inst);
+  s('pr-gas', P.gas_hw+' zł');         s('inst-gas', P.gas_inst);
+  s('pr-temp', P.temp_hw+' zł');       s('inst-temp', P.temp_inst);
+  s('pr-pirext', P.pirext_hw+' zł');   s('inst-pirext', P.pirext_inst);
+  s('pr-tow', P.tow_hw+' zł');         s('inst-tow', P.tow_inst);
+  s('pr-camera', P.camera_hw+' zł');   s('inst-camera', P.camera_inst);
+  s('pr-eyesensor', P.eyesensor_hw+' zł'); s('inst-eyesensor', P.eyesensor_inst);
+  s('pr-strobe-v', P.strobe_inst);
+  s('pr-immo-siren', P.siren_hw+' zł');
+  s('pr-cbw-u', P.cbw_hw);             s('inst-cbw-u', P.cbw_inst);
+  s('pr-cw-u', P.cw_hw);               s('inst-cw-u', P.cw_inst);
+  s('pr-pir-u', P.pir_hw);             s('inst-pir-u', P.pir_inst);
+  s('pr-glass-u', P.glass_hw);         s('inst-glass-u', P.glass_inst);
+  s('pr-brylok-u', P.brylok);
+  s('tp-b', (P.unit_basic+P.unit_basic_inst).toLocaleString('pl-PL'));
+  s('tp-p', (P.unit_pro+P.unit_pro_inst).toLocaleString('pl-PL'));
+  s('tp-pm', (P.unit_promax+P.unit_promax_inst).toLocaleString('pl-PL'));
+  s('tm-b', P.sub_basic); s('tm-p', P.sub_pro); s('tm-pm', P.sub_promax);
+  s('pkgp-gps', (P.unit_basic+P.unit_basic_inst).toLocaleString('pl-PL'));
+  s('pkgp-immo', P.immo_analog.toLocaleString('pl-PL'));
+  s('pkgp-alarm', (P.alarm_hw+P.alarm_inst).toLocaleString('pl-PL'));
+  s('pkgp-full', (P.unit_pro+P.unit_pro_inst+P.immo_can+P.immo_can_inst+P.alarm_hw+P.alarm_inst).toLocaleString('pl-PL'));
+  updateSirenDisplay();
+  updateCart();
+}
+
+// ════════════════════════════════════════════════════════════
+// INIT
+// ════════════════════════════════════════════════════════════
+const md = new Date(); md.setDate(md.getDate()+3);
+const pd = document.getElementById('pref-date'); if(pd) pd.min=md.toISOString().split('T')[0];
+refreshDisplays();
+updateCart();
+</script>
+</body>
+</html>

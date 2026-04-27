@@ -808,7 +808,7 @@ footer a{color:var(--blue);text-decoration:none}
       </div>
       <div class="conf-info">
         <div class="conf-title">Czujniki – okna, drzwi, wnętrze <span id="sc-sensors"></span></div>
-        <div class="conf-sub">Kontaktrony · PIR · gaz · zbicie szyby · temperatura · holowanie</div>
+        <div class="conf-sub">Dostępne dla wszystkich pakietów · Kontaktrony · PIR · gaz · zbicie szyby · temperatura · holowanie</div>
       </div>
       <span class="conf-chev">▼</span>
     </div>
@@ -1219,8 +1219,9 @@ const S = {
   gpsTier: 'basic',
   gpsBilling: 'monthly',
   gpsInstall: 'pro',
+  alarmActive: false, // true only when user opens alarm section and it's included
   opts: {},
-  qty: {sirens:2, cbw:0, cw:0, brylok:0, pir:0, glass:0},
+  qty: {sirens:0, cbw:0, cw:0, brylok:0, pir:0, glass:0},
   immoType: null,
   install: {type:'workshop', km:0, loc:'', travelCost:0},
 };
@@ -1278,7 +1279,7 @@ function togglePkg(id, el) {
   document.getElementById('psel-full').textContent='';
   document.querySelectorAll('[data-pkg=full]').forEach(e=>e.classList.remove('sel'));
   document.getElementById('pkg-warn').classList.add('hidden');
-  // DO NOT update cart here - no price on pkg selection
+  // NO cart update on tile click - price only from actual configuration
 }
 
 function selectFull() {
@@ -1298,15 +1299,16 @@ function selectFull() {
 // SECTIONS SETUP
 // ════════════════════════════════════════════════════════════
 function setupSections() {
+  // Show sections based on selected packages
   ['gps','immo','alarm'].forEach(id => {
     const el=document.getElementById('sec-'+id);
     if(el) el.style.display = S.pkgs[id]?'block':'none';
   });
-  const showSens = S.pkgs.alarm||S.pkgs.immo;
+  // Sensors always show if ANY package selected (independent section)
+  const anyPkg = Object.values(S.pkgs).some(Boolean);
   const ss=document.getElementById('sec-sensors');
-  if(ss) ss.style.display = showSens?'block':'none';
-  // Set sirens default
-  if(S.pkgs.alarm && S.qty.sirens===0) { S.qty.sirens=2; document.getElementById('q-sirens').textContent=2; }
+  if(ss) ss.style.display = anyPkg?'block':'none';
+  // Sirens: DO NOT auto-set - user must choose manually
   updateSirenDisplay();
   updateSelfInstallNote();
 }
@@ -1318,6 +1320,12 @@ function toggleConf(hd, bdId) {
   bd.style.display = isOpen ? 'none' : 'block';
   chev.classList.toggle('open', !isOpen);
   hd.classList.toggle('is-open', !isOpen);
+  // Activate alarm when user opens alarm config section
+  if(bdId==='bd-alarm' && !isOpen) {
+    S.alarmActive = true;
+    if(S.qty.sirens===0) { S.qty.sirens=2; document.getElementById('q-sirens').textContent=2; updateSirenDisplay(); }
+    updateCart();
+  }
 }
 
 // ════════════════════════════════════════════════════════════
@@ -1447,13 +1455,21 @@ function calcTotals() {
   const nv = Math.max(1, window.S_vehCount||1);
   const {gps, immo, alarm} = S.pkgs;
 
-  // Unit – determined by combo, NOT visible to client
+  // Unit – only added when user has made concrete configuration choices
+  // GPS: always needs unit (user chose tier)
+  // Alarm: only when alarm opt is checked (req card = always on when pkg selected? No - check S.opts)
+  // Immo: only when immoType chosen
+  const hasAlarmConfig = alarm && S.alarmActive; // alarm active only when pkg confirmed in config
+  const hasImmoConfig = immo && S.immoType !== null;
+  const hasGpsConfig = gps; // GPS always adds unit when package selected
+  const hasSensorsOnly = !gps && !alarm && !immo && (S.qty.cbw>0||S.qty.cw>0||S.qty.pir>0||S.qty.glass>0||Object.keys(S.opts).some(k=>['gas','temp','pirext','tow','camera','eyesensor'].includes(k)));
+
   let uHw=0, uIn=0, uN='';
-  if(gps && (alarm||immo)) { uHw=P.unit_pro; uIn=P.unit_pro_inst; uN='Jednostka telematyczna 4G LTE + CAN'; }
-  else if(gps && S.gpsTier==='promax') { uHw=P.unit_promax; uIn=P.unit_promax_inst; uN='Jednostka GPS Pro Max 4G'; }
-  else if(gps && S.gpsTier==='pro') { uHw=P.unit_pro; uIn=P.unit_pro_inst; uN='Jednostka GPS Pro 4G LTE + CAN'; }
-  else if(gps) { uHw=P.unit_basic; uIn=S.gpsInstall==='self'?0:P.unit_basic_inst; uN='Jednostka GPS Basic 4G LTE'; }
-  else if(alarm||immo) { uHw=P.unit_basic; uIn=P.unit_basic_inst; uN='Jednostka 4G LTE'; }
+  if(hasGpsConfig && (hasAlarmConfig||hasImmoConfig)) { uHw=P.unit_pro; uIn=P.unit_pro_inst; uN='Jednostka telematyczna 4G LTE + CAN'; }
+  else if(hasGpsConfig && S.gpsTier==='promax') { uHw=P.unit_promax; uIn=P.unit_promax_inst; uN='Jednostka GPS Pro Max 4G'; }
+  else if(hasGpsConfig && S.gpsTier==='pro') { uHw=P.unit_pro; uIn=P.unit_pro_inst; uN='Jednostka GPS Pro 4G LTE + CAN'; }
+  else if(hasGpsConfig) { uHw=P.unit_basic; uIn=S.gpsInstall==='self'?0:P.unit_basic_inst; uN='Jednostka GPS Basic 4G LTE'; }
+  else if(hasAlarmConfig||hasImmoConfig||hasSensorsOnly) { uHw=P.unit_basic; uIn=P.unit_basic_inst; uN='Jednostka 4G LTE'; }
 
   if(uHw>0) {
     hw+=uHw*nv; inst+=uIn*nv;
@@ -1473,8 +1489,8 @@ function calcTotals() {
     lines.push({name:`Brylok elektroniczny × ${S.qty.brylok}`, hw:P.brylok*S.qty.brylok, inst:0});
   }
 
-  // Alarm
-  if(alarm) {
+  // Alarm - only when user confirmed alarm selection in config
+  if(alarm && S.alarmActive) {
     hw+=P.alarm_hw*nv; inst+=P.alarm_inst*nv;
     lines.push({name:'Alarm CAN'+(nv>1?` × ${nv}`:''), hw:P.alarm_hw*nv, inst:P.alarm_inst*nv});
     if(S.qty.sirens>0) {
@@ -1673,6 +1689,7 @@ function resetAll() {
   S.qty={sirens:2,cbw:0,cw:0,brylok:0,pir:0,glass:0};
   ['q-sirens','q-cbw','q-cw','q-brylok','q-pir','q-glass'].forEach(id=>{const el=document.getElementById(id);if(el)el.textContent=id==='q-sirens'?'2':'0';});
   S.immoType=null;
+  S.alarmActive=false;
   S.gpsTier='basic'; S.gpsBilling='monthly'; S.gpsInstall='pro';
   document.querySelectorAll('#tier-grid .tier-card').forEach(t=>t.classList.toggle('sel',t.dataset.tier==='basic'));
   S.install={type:'workshop',km:0,loc:'',travelCost:0};

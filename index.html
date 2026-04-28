@@ -465,7 +465,7 @@ footer a{color:var(--blue);text-decoration:none}
 <div class="step" id="step-4">
   <div class="al ok" style="margin-bottom:.6rem"><span>✓</span><div>Wycena gotowa. Wyślij zapytanie – oddzwonimy w ciągu 24 godzin roboczych.</div></div>
   <div id="sum-body"></div>
-  <button class="btn btn-pri full" onclick="sendEmail()">Wyślij wycenę e-mailem</button>
+  <button class="btn btn-pri full btn-send-email" onclick="sendEmail()">📧 Wyślij wycenę e-mailem</button>
   <button class="btn btn-sec full" onclick="window.print()">Drukuj / Zapisz PDF</button>
   <div class="al info" style="margin-top:.5rem"><span>ℹ</span>
     <div><a href="tel:+48516956809" style="color:var(--blue)">+48 516 956 809</a> · <a href="mailto:info@evtelematix.com" style="color:var(--blue)">info@evtelematix.com</a> · <a href="https://evtelematix.pl" style="color:var(--blue)" target="_blank">evtelematix.pl</a></div>
@@ -587,6 +587,12 @@ const PLABELS = {gps_b_hw:'GPS Basic sprzęt',gps_b_inst:'GPS Basic montaż',gps
   elmes_pir_ptx50:'Elmes PTX50 PIR bezprzew.',elmes_glass_gbx1:'Elmes GBX1 zbicie szyby',elmes_contact_ctx5:'Elmes CTX5 kontaktron',elmes_siren_wss:'Elmes WSS syrena bezprzew.',
   relay_12v:'Przekaźnik 12V (immo analog.)',
   etoll_m:'eToll miesięcznie netto (zł)',etoll_y:'eToll roczny netto (zł)',cam_sim:'Dopłata SIM kamera (zł/mies.)'};
+
+// ══════════════════════════════════════════════
+// FORMSPREE CONFIG – wpisz swój endpoint po rejestracji na formspree.io
+// ══════════════════════════════════════════════
+const FORMSPREE_ENDPOINT = localStorage.getItem('evt_formspree') || '';
+// Hasło admina do zmiany endpointu: w panelu admina
 
 function loadP(){try{const s=localStorage.getItem('evt_p_v8');if(s)return Object.assign({},DEF,JSON.parse(s));}catch(e){}return Object.assign({},DEF);}
 let P = loadP();
@@ -1662,33 +1668,140 @@ function renderSum() {
 
 function sendEmail() {
   const {hw,inst,travel,total,lines,monthly,billing} = calc();
-  const linesTxt=lines.map(l=>`${l.n}: ${Math.round(l.hw)} zł sprzęt + ${Math.round(l.inst)} zł montaż`).join('\n');
-  const sub=encodeURIComponent(`Wycena EVTelematix – ${fv('f-fn')} ${fv('f-ln')} – ${Math.round(total)} zł`);
-  const body=encodeURIComponent([
-    'WYCENA EVTelematix','='.repeat(38),'',
-    `Klient: ${fv('f-fn')} ${fv('f-ln')}`,`Tel: ${fv('f-ph')}`,`Email: ${fv('f-em')}`,
+  if(total === 0) { alert('Najpierw skonfiguruj pakiet, aby wygenerować wycenę.'); return; }
+
+  const fname=fv('f-fn'), lname=fv('f-ln'), phone=fv('f-ph'), email=fv('f-em');
+  const linesTxt = lines.map(l=>`${l.n}: ${Math.round(l.hw)} zł sprzęt + ${Math.round(l.inst)} zł montaż`).join('\n');
+  const subject  = `Wycena EVTelematix – ${fname} ${lname} – ${Math.round(total)} zł netto`;
+  const bodyLines = [
+    'WYCENA EVTelematix','='.repeat(40),'',
+    `Klient: ${fname} ${lname}`, `Tel: ${phone}`, `Email: ${email}`,
     fv('f-co')?`Firma: ${fv('f-co')}${fv('f-ni')?' NIP:'+fv('f-ni'):''}` : '',
-    `Miejscowość: ${fv('f-ci')}`,`Pojazdów: ${VC}`,`Pakiet: ${PKG}`,
-    '','KOMPONENTY:',linesTxt,'',
-    `Sprzęt: ${Math.round(hw)} zł`,`Montaż: ${Math.round(inst)} zł`,
+    `Miejscowość: ${fv('f-ci')}`, `Pojazdów: ${VC}`, `Pakiet: ${PKG||'—'}`,
+    '', 'KOMPONENTY:', linesTxt, '',
+    `Sprzęt: ${Math.round(hw)} zł netto`,
+    `Montaż: ${Math.round(inst)} zł netto`,
     travel?`Dojazd: ${Math.round(travel)} zł`:'',
     `RAZEM: ${Math.round(total)} zł netto`,
-    (PKG==='gps'||PKG==='full')?`Platforma: ${billing==='yearly'?Math.round(monthly*11)+' zł/rok':monthly+' zł/mies.'}` : '',
+    monthly?`Platforma/abonament: ${monthly} zł/mies.`:'',
     `Instalacja: ${INST.type==='w'?'Warsztat':'Dojazd'}`,
-    fv('notes')?`Uwagi: ${fv('notes')}` : '',
-    fv('v-model')?`Pojazd: ${fv('v-model')} ${fv('v-year')} – ${fv('v-body')||'brak zabudowy'}` : '',
-    fv('v-vin')?`VIN: ${fv('v-vin')}` : '',
-    '','EVTelematix · +48 516 956 809 · info@evtelematix.com · evtelematix.pl',
-  ].filter(Boolean).join('\n'));
-  window.location.href=`mailto:info@evtelematix.com?cc=${encodeURIComponent(fv('f-em'))}&subject=${sub}&body=${body}`;
+    fv('notes')?`Uwagi: ${fv('notes')}`:'',
+    fv('v-model')?`Pojazd: ${fv('v-model')} ${fv('v-year')} ${fv('v-body')?'('+fv('v-body')+')':''}`:'',
+    fv('v-vin')?`VIN: ${fv('v-vin')}`:'',
+    '', 'EVTelematix · +48 516 956 809 · info@evtelematix.com · evtelematix.pl',
+  ].filter(Boolean).join('\n');
+
+  // Save lead
+  try {
+    const l=JSON.parse(localStorage.getItem('evt_leads_v8')||'[]');
+    l.push({ts:new Date().toISOString(),fn:fname,ln:lname,ph:phone,em:email,co:fv('f-co'),ci:fv('f-ci'),total,pkg:{gps:'GPS',immo:'Immobilizer',alarm:'Autoalarm',full:'System Pro'}[PKG]||PKG,vc:VC});
+    localStorage.setItem('evt_leads_v8',JSON.stringify(l.slice(-50)));
+  } catch(e){}
+
+  // Try Formspree first
+  const endpoint = localStorage.getItem('evt_formspree') || '';
+  if(endpoint && endpoint.includes('formspree.io')) {
+    const btn = document.querySelector('.btn-send-email');
+    if(btn) { btn.textContent='Wysyłanie...'; btn.disabled=true; }
+    fetch(endpoint, {
+      method:'POST',
+      headers:{'Content-Type':'application/json','Accept':'application/json'},
+      body: JSON.stringify({
+        _subject: subject,
+        imie_nazwisko: `${fname} ${lname}`,
+        telefon: phone, email, firma: fv('f-co'),
+        miejscowosc: fv('f-ci'), pojazdy: VC, pakiet: PKG,
+        razem_netto: Math.round(total)+' zł',
+        platforma: monthly?monthly+' zł/mies.':'brak',
+        instalacja: INST.type==='w'?'Warsztat':'Dojazd',
+        szczegoly: linesTxt,
+        uwagi: fv('notes'),
+        pojazd: fv('v-model')?`${fv('v-model')} ${fv('v-year')}`:'',
+        tresc_pelna: bodyLines,
+      })
+    })
+    .then(r => r.json())
+    .then(data => {
+      if(data.ok) {
+        showSuccessModal(fname, phone, total);
+      } else {
+        showEmailModal(subject, bodyLines, email);
+      }
+    })
+    .catch(() => showEmailModal(subject, bodyLines, email))
+    .finally(() => {
+      const b=document.querySelector('.btn-send-email');
+      if(b){b.textContent='Wyślij wycenę e-mailem';b.disabled=false;}
+    });
+  } else {
+    // No Formspree – show modal with options
+    showEmailModal(subject, bodyLines, email);
+  }
 }
 
-// ══════════════════════════════════════════════
-// RESET
-// ══════════════════════════════════════════════
+function showSuccessModal(name, phone, total) {
+  const m = document.createElement('div');
+  m.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:9999;display:flex;align-items:center;justify-content:center;padding:1rem';
+  m.innerHTML=`<div style="background:#fff;border-radius:12px;max-width:400px;width:100%;overflow:hidden">
+    <div style="background:#0F6B30;padding:1rem 1.2rem;text-align:center">
+      <div style="font-size:2rem">✅</div>
+      <div style="font-family:'Syne',sans-serif;font-weight:700;color:#fff;font-size:1rem;margin-top:.3rem">Wycena wysłana!</div>
+    </div>
+    <div style="padding:1rem 1.2rem">
+      <p style="font-size:.83rem;color:#374151;line-height:1.6;margin-bottom:.7rem">
+        Cześć <strong>${name}</strong>! Twoja wycena (<strong>${Math.round(total).toLocaleString('pl-PL')} zł netto</strong>) została wysłana do EVTelematix.<br><br>
+        Skontaktujemy się z Tobą w ciągu <strong>24 godzin</strong> roboczych.
+      </p>
+      <div style="background:#F0FDF4;border:1px solid #BBF7D0;border-radius:8px;padding:.7rem;font-size:.78rem;color:#065F46;margin-bottom:.8rem">
+        📞 <strong>+48 516 956 809</strong><br>
+        ✉️ info@evtelematix.com<br>
+        🌐 evtelematix.pl
+      </div>
+      <button onclick="this.closest('div[style*=fixed]').remove()" 
+        style="width:100%;background:#1A56CC;color:#fff;border:none;border-radius:8px;padding:.7rem;font-family:'Syne',sans-serif;font-weight:700;font-size:.84rem;cursor:pointer">
+        Zamknij
+      </button>
+    </div>
+  </div>`;
+  document.body.appendChild(m);
+  m.addEventListener('click', e=>{ if(e.target===m) m.remove(); });
+}
 
-let GPS_ETOLL={on:false,bill:'m'};
-let ETOLL = {gps:{on:false,bill:'m'},immo:{on:false,bill:'m'},alarm:{on:false,bill:'m'},full:{on:false,bill:'m'}};
+function showEmailModal(subject, bodyText, clientEmail) {
+  const short = bodyText.substring(0,1500);
+  const mailtoUrl = `mailto:info@evtelematix.com?cc=${encodeURIComponent(clientEmail)}&subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(bodyText)}`;
+  const m = document.createElement('div');
+  m.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:9999;display:flex;align-items:center;justify-content:center;padding:1rem;overflow-y:auto';
+  m.innerHTML=`<div style="background:#fff;border-radius:12px;max-width:520px;width:100%;overflow:hidden;margin:auto">
+    <div style="background:var(--navy2,#0C1E30);padding:.8rem 1.1rem;display:flex;justify-content:space-between;align-items:center">
+      <span style="font-family:'Syne',sans-serif;font-weight:700;color:#E2E8F0;font-size:.88rem">Wyślij wycenę</span>
+      <button onclick="this.closest('div[style*=fixed]').remove()" style="background:none;border:none;color:#64748B;cursor:pointer;font-size:1.1rem">✕</button>
+    </div>
+    <div style="padding:1rem 1.1rem">
+      <div style="background:#FFF8E7;border:1px solid #FDE68A;border-radius:8px;padding:.7rem;font-size:.74rem;color:#92400E;margin-bottom:.75rem">
+        ⚠️ <strong>Nie skonfigurowano automatycznego wysyłania.</strong><br>
+        Użyj jednej z opcji poniżej. Po rejestracji na <a href="https://formspree.io" target="_blank" style="color:#1A56CC">formspree.io</a> wpisz endpoint w Panelu admina – wysyłanie będzie automatyczne.
+      </div>
+      <div style="display:flex;gap:.5rem;flex-wrap:wrap;margin-bottom:.75rem">
+        <a href="${mailtoUrl}" target="_blank" style="flex:1;min-width:140px;background:#1A56CC;color:#fff;border:none;border-radius:8px;padding:.65rem .8rem;font-family:'Syne',sans-serif;font-weight:700;font-size:.79rem;cursor:pointer;text-align:center;text-decoration:none">
+          📧 Otwórz w programie pocztowym
+        </a>
+        <button onclick="navigator.clipboard.writeText(${JSON.stringify(bodyText)}).then(()=>{this.textContent='✓ Skopiowano!';setTimeout(()=>this.textContent='📋 Kopiuj treść',2000)})"
+          style="flex:1;min-width:140px;background:#fff;color:#111827;border:1.5px solid #E5E7EB;border-radius:8px;padding:.65rem .8rem;font-family:'Syne',sans-serif;font-weight:700;font-size:.79rem;cursor:pointer">
+          📋 Kopiuj treść
+        </button>
+      </div>
+      <div style="font-size:.72rem;font-weight:600;color:#6B7280;margin-bottom:.28rem">Treść wyceny:</div>
+      <textarea readonly style="width:100%;height:180px;border:1.5px solid #E5E7EB;border-radius:8px;padding:.55rem .65rem;font-size:.69rem;font-family:monospace;resize:none;color:#374151;line-height:1.55">${bodyText.replace(/</g,'&lt;')}</textarea>
+      <div style="margin-top:.6rem;font-size:.71rem;color:#6B7280;text-align:center">
+        Skopiuj treść i wyślij na: <strong>info@evtelematix.com</strong>
+      </div>
+    </div>
+  </div>`;
+  document.body.appendChild(m);
+  m.addEventListener('click', e=>{ if(e.target===m) m.remove(); });
+}
+
 
 function togGpsEtoll(e) {
   if(e) e.stopPropagation();
@@ -1949,6 +2062,25 @@ function renderAdmin() {
     }
   }catch(e){}
 
+  // Formspree endpoint setting
+  const fs = localStorage.getItem('evt_formspree')||'';
+  html += `<div class="adm-sec">📨 Formspree – automatyczne powiadomienia e-mail</div>
+  <div style="background:#EFF6FF;border:1px solid #BFDBFE;border-radius:var(--rs);padding:.75rem;margin-bottom:.6rem">
+    <div style="font-size:.73rem;font-weight:600;color:var(--blue);margin-bottom:.35rem">Endpoint Formspree (po rejestracji na formspree.io)</div>
+    <div style="display:flex;gap:.4rem;flex-wrap:wrap;align-items:center">
+      <input type="text" id="fs-endpoint" value="${fs}" placeholder="https://formspree.io/f/xabcdefg"
+        style="flex:1;min-width:220px;border:1.5px solid var(--border);border-radius:var(--rs);padding:.38rem .6rem;font-size:.79rem">
+      <button class="abtn abtn-pri" onclick="saveFormspree()" style="padding:.38rem .85rem;font-size:.74rem">Zapisz endpoint</button>
+      ${fs?'<span style="color:var(--green);font-size:.7rem;font-weight:600">✓ Skonfigurowane</span>':'<span style="color:var(--amber);font-size:.7rem">⚠ Nie skonfigurowane</span>'}
+    </div>
+    <div style="font-size:.67rem;color:var(--muted);margin-top:.35rem;line-height:1.6">
+      1. Zarejestruj się na <strong>formspree.io</strong> (darmowe do 50 leadów/mies.)<br>
+      2. Utwórz nowy formularz → skopiuj endpoint<br>
+      3. Wklej powyżej i kliknij Zapisz<br>
+      Po zapisaniu każde wysłanie wyceny przez klienta trafi automatycznie na Twój e-mail.
+    </div>
+  </div>`;
+
   html+=`<div class="adm-acts">
     <button class="abtn abtn-pri" onclick="saveP()">💾 Zapisz ceny</button>
     <button class="abtn abtn-del" onclick="if(confirm('Przywrócić domyślne ceny?'))resetP()">↩ Przywróć domyślne</button>
@@ -1966,6 +2098,12 @@ function previewEur(rate) {
 }
 
 
+function saveFormspree(){
+  const ep=document.getElementById('fs-endpoint')?.value||'';
+  localStorage.setItem('evt_formspree',ep.trim());
+  alert(ep?'Endpoint zapisany! Teraz wyceny będą wysyłane automatycznie.':'Endpoint wyczyszczony.');
+  renderAdmin();
+}
 function saveEurRate(){
   const r=parseFloat(document.getElementById('eur-rate')?.value||'4.25');
   const d=new Date().toLocaleDateString('pl-PL');

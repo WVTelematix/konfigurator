@@ -466,7 +466,8 @@ footer a{color:var(--blue);text-decoration:none}
   <div class="al ok" style="margin-bottom:.6rem"><span>✓</span><div>Wycena gotowa. Wyślij zapytanie – oddzwonimy w ciągu 24 godzin roboczych.</div></div>
   <div id="sum-body"></div>
   <button class="btn btn-pri full btn-send-email" onclick="sendEmail()">📧 Wyślij wycenę e-mailem</button>
-  <button class="btn btn-sec full" onclick="window.print()">Drukuj / Zapisz PDF</button>
+  <button class="btn btn-sec full" onclick="downloadQuotePDF()">⬇ Pobierz wycenę PDF</button>
+  <button class="btn btn-sec full" onclick="window.print()">🖨 Drukuj</button>
   <div class="al info" style="margin-top:.5rem"><span>ℹ</span>
     <div><a href="tel:+48516956809" style="color:var(--blue)">+48 516 956 809</a> · <a href="mailto:info@evtelematix.com" style="color:var(--blue)">info@evtelematix.com</a> · <a href="https://evtelematix.pl" style="color:var(--blue)" target="_blank">evtelematix.pl</a></div>
   </div>
@@ -571,6 +572,51 @@ const DEF = {
   rfid_hw:180, rfid_inst:80,           // ID kierowcy RFID/iButton
   sos_hw:95, sos_inst:55,              // Przycisk SOS
   km_rate:2,                        // zł/km dojazd
+  // ── Stawki instalacji (zł/h) ──
+  labor_basic:150,                  // Stawka bazowa roboczogodzina
+  labor_complex:200,                // Stawka zaawansowana (CAN, tacho)
+  labor_mobile:250,                 // Stawka dojazd/mobile
+  // ── Teltonika – pełny katalog ──
+  telt_fmb920_hw:204,  // FMB920 2G
+  telt_fmc920_hw:288,  // FMC920 4G
+  telt_fmt100_hw:287,  // FMT100 4G
+  telt_fmc880_hw:396,  // FMC880 4G
+  telt_fmb130_hw:228,  // FMB130 BT
+  telt_fmc150_hw:450,  // FMC150 4G BT CAN
+  telt_fmc650_hw:680,  // FMC650 4G CAN rugged
+  telt_ecan_hw:128,    // E CAN reader
+  telt_btsmp_hw:162,   // BT SMP sensor
+  telt_tat140_hw:449,  // TAT140 temp czujnik BT
+  telt_tat240_hw:490,  // TAT240 temp BT zaawansowany
+  telt_eyebacon_hw:112,// Eye Beacon BT
+  telt_eyesensor_hw:152,// Eye Sensor BT
+  telt_atexbacon_hw:178,// ATEX iBEACON
+  telt_atexsensor_hw:212,// ATEX Sensor
+  telt_ftc921_hw:285,  // FTC921 4G Cat1
+  telt_fmb003_hw:307,  // FMB003 rugged
+  telt_dashcam_hw:480, // Dash Cam ADAS
+  telt_rfid_hw:213,    // RFID reader + czytnik
+  telt_sim100_hw:73,   // SIM 1/100 (1 miesiąc)
+  telt_sim500_hw:73,   // SIM 5/500 (5 miesięcy)
+  telt_fuse_hw:35,     // Bezpiecznik 3A 125V
+  telt_relay_hw:35,    // Przekaźnik MINI
+  // Przewody Teltonika FMS/Tacho/CAN
+  telt_fms_cable_hw:85,   // Kabel FMS Standard
+  telt_tacho_cable_hw:120,// Kabel tacho cyfrowy (Teltonika)
+  telt_can_splitter_hw:45,// Splitter CAN (Y-adapter)
+  telt_j1939_cable_hw:95, // Kabel J1939
+  telt_lvcan_hw:65,       // LVCAN000 moduł CAN
+  // Materiały instalacyjne
+  cable_can_m:8,                    // Przewód CAN (zł/mb)
+  cable_power_m:6,                  // Przewód zasilający (zł/mb)
+  connector_can:12,                 // Złącze CAN (szt.)
+  connector_obd:25,                 // Złącze OBD (szt.)
+  connector_tacho:85,               // Złącze tacho cyfrowy (szt.)
+  connector_j1939:65,               // Złącze J1939 (szt.)
+  fuse_holder:8,                    // Bezpiecznik + obudowa
+  heatshrink:5,                     // Rurka termokurczliwa (zestaw)
+  tape_install:12,                  // Taśma instalacyjna + opaski
+  install_kit:45,                   // Zestaw inst. (przewody+złącza standardowe)
   // SIM cards
   sim_global_500mb:50,              // SIM Global 500MB / rok
   sim_global_100mb:25,              // SIM Global Lite 100MB / rok
@@ -589,7 +635,28 @@ const BUY = {etoll_m:0,etoll_y:0,cam_sim:0,gps_b_hw:200,gps_p_hw:300,gps_x_hw:34
   sim_global_500mb:25,sim_global_100mb:12,sim_cam:0,
   ftc880:200,ftc305:300,ftc881:220,fmc880:240,fmb920:110,
   elmes_pir_ptx50:79,elmes_glass_gbx1:109,elmes_contact_ctx5:55,elmes_siren_wss:193,relay_12v:7,temp_hw:35,tow_hw:80,cam_hw:300,eye_hw:120,antijam_hw:200};
-const PLABELS = {gps_b_hw:'GPS Basic sprzęt',gps_b_inst:'GPS Basic montaż',gps_p_hw:'GPS Pro sprzęt',gps_p_inst:'GPS Pro montaż',gps_x_hw:'GPS Pro Max sprzęt',gps_x_inst:'GPS Pro Max montaż',sub_b:'Abonament Basic (zł/mies.)',sub_p:'Abonament Pro',sub_x:'Abonament Pro Max',immo_hw:'Immobilizer CAN sprzęt',immo_inst:'Immobilizer CAN montaż',immo_a_hw:'Immobilizer analog. sprzęt',immo_a_inst:'Immobilizer analog. montaż',brylok:'Brylok (szt.)',alarm_hw:'Alarm CAN sprzęt',alarm_inst:'Alarm CAN montaż',siren_hw:'Syrena sprzęt (szt.)',siren_inst:'Syrena montaż (szt.)',cbw_hw:'Kontaktron bezprzew. sprzęt',cbw_inst:'Kontaktron bezprzew. montaż',cw_hw:'Kontaktron kablowy sprzęt',cw_inst:'Kontaktron kablowy montaż',pir_hw:'PIR wewn. sprzęt',pir_inst:'PIR wewn. montaż',pirx_hw:'PIR zewn. sprzęt',pirx_inst:'PIR zewn. montaż',glass_hw:'Zbicie szyby sprzęt',glass_inst:'Zbicie szyby montaż',gas_hw:'Czujnik gazu sprzęt',gas_inst:'Czujnik gazu montaż',temp_hw:'Czujnik temp. sprzęt',temp_inst:'Czujnik temp. montaż',tow_hw:'Holowanie 3D sprzęt',tow_inst:'Holowanie 3D montaż',cam_hw:'Kamera sprzęt',cam_inst:'Kamera montaż',eye_hw:'Eye Sensor sprzęt',eye_inst:'Eye Sensor aktywacja',antijam_hw:'Anti-Jamming sprzęt',antijam_inst:'Anti-Jamming montaż',existing_inst:'Integracja z alarmem',strobe_inst:'Stroboskop montaż',km_rate:'Dojazd zł/km',
+const PLABELS = {gps_b_hw:'GPS Basic sprzęt',gps_b_inst:'GPS Basic montaż',gps_p_hw:'GPS Pro sprzęt',gps_p_inst:'GPS Pro montaż',gps_x_hw:'GPS Pro Max sprzęt',gps_x_inst:'GPS Pro Max montaż',sub_b:'Abonament Basic (zł/mies.)',sub_p:'Abonament Pro',sub_x:'Abonament Pro Max',immo_hw:'Immobilizer CAN sprzęt',immo_inst:'Immobilizer CAN montaż',immo_a_hw:'Immobilizer analog. sprzęt',immo_a_inst:'Immobilizer analog. montaż',brylok:'Brylok (szt.)',alarm_hw:'Alarm CAN sprzęt',alarm_inst:'Alarm CAN montaż',siren_hw:'Syrena sprzęt (szt.)',siren_inst:'Syrena montaż (szt.)',cbw_hw:'Kontaktron bezprzew. sprzęt',cbw_inst:'Kontaktron bezprzew. montaż',cw_hw:'Kontaktron kablowy sprzęt',cw_inst:'Kontaktron kablowy montaż',pir_hw:'PIR wewn. sprzęt',pir_inst:'PIR wewn. montaż',pirx_hw:'PIR zewn. sprzęt',pirx_inst:'PIR zewn. montaż',glass_hw:'Zbicie szyby sprzęt',glass_inst:'Zbicie szyby montaż',gas_hw:'Czujnik gazu sprzęt',gas_inst:'Czujnik gazu montaż',temp_hw:'Czujnik temp. sprzęt',temp_inst:'Czujnik temp. montaż',tow_hw:'Holowanie 3D sprzęt',tow_inst:'Holowanie 3D montaż',cam_hw:'Kamera sprzęt',cam_inst:'Kamera montaż',eye_hw:'Eye Sensor sprzęt',eye_inst:'Eye Sensor aktywacja',antijam_hw:'Anti-Jamming sprzęt',antijam_inst:'Anti-Jamming montaż',existing_inst:'Integracja z alarmem',strobe_inst:'Stroboskop montaż',labor_basic:0,labor_complex:0,labor_mobile:0,
+  telt_fmb920_hw:128,telt_fmc920_hw:180,telt_fmt100_hw:179,telt_fmc880_hw:248,
+  telt_fmb130_hw:143,telt_fmc150_hw:355,telt_fmc650_hw:496,telt_ecan_hw:80,
+  telt_btsmp_hw:101,telt_tat140_hw:333,telt_tat240_hw:380,telt_eyebacon_hw:70,
+  telt_eyesensor_hw:95,telt_atexbacon_hw:111,telt_atexsensor_hw:132,
+  telt_ftc921_hw:185,telt_fmb003_hw:245,telt_dashcam_hw:384,telt_rfid_hw:141,
+  telt_sim100_hw:26,telt_sim500_hw:57,telt_fuse_hw:30,telt_relay_hw:10,
+  telt_fms_cable_hw:0,telt_tacho_cable_hw:0,telt_can_splitter_hw:0,telt_j1939_cable_hw:0,telt_lvcan_hw:0,
+  km_rate:'Dojazd zł/km',labor_basic:'Stawka roboczogodzina – podstawowa',labor_complex:'Stawka roboczogodzina – CAN/tacho',labor_mobile:'Stawka roboczogodzina – mobile',
+  telt_fmb920_hw:'Teltonika FMB920 2G',telt_fmc920_hw:'Teltonika FMC920 4G',telt_fmt100_hw:'Teltonika FMT100 4G',telt_fmc880_hw:'Teltonika FMC880 4G',
+  telt_fmb130_hw:'Teltonika FMB130 BT',telt_fmc150_hw:'Teltonika FMC150 4G BT CAN',telt_fmc650_hw:'Teltonika FMC650 4G CAN rugged',
+  telt_ecan_hw:'Teltonika E CAN reader',telt_btsmp_hw:'Teltonika BT SMP sensor',
+  telt_tat140_hw:'Teltonika TAT140 temp. BT',telt_tat240_hw:'Teltonika TAT240 temp. BT zaawanasowany',
+  telt_eyebacon_hw:'Teltonika Eye Beacon BT',telt_eyesensor_hw:'Teltonika Eye Sensor BT',
+  telt_atexbacon_hw:'Teltonika ATEX iBEACON',telt_atexsensor_hw:'Teltonika ATEX Sensor',
+  telt_ftc921_hw:'Teltonika FTC921 4G Cat1',telt_fmb003_hw:'Teltonika FMB003 rugged',
+  telt_dashcam_hw:'Teltonika Dash Cam ADAS',telt_rfid_hw:'Teltonika RFID reader+czytnik',
+  telt_sim100_hw:'Teltonika SIM 1/100 (1 mies.)',telt_sim500_hw:'Teltonika SIM 5/500 (5 mies.)',
+  telt_fuse_hw:'Bezpiecznik 3A 125V (szt.)',telt_relay_hw:'Przekaźnik MINI (szt.)',
+  telt_fms_cable_hw:'Kabel FMS Standard (Teltonika)',telt_tacho_cable_hw:'Kabel tacho cyfrowy (Teltonika)',
+  telt_can_splitter_hw:'Splitter CAN Y-adapter',telt_j1939_cable_hw:'Kabel J1939',telt_lvcan_hw:'LVCAN000 moduł CAN',
+  cable_can_m:'Przewód CAN (zł/mb)',cable_power_m:'Przewód zasilający (zł/mb)',connector_can:'Złącze CAN (szt.)',connector_obd:'Złącze OBD (szt.)',connector_tacho:'Złącze tacho cyfrowy (szt.)',connector_j1939:'Złącze J1939 (szt.)',fuse_holder:'Bezpiecznik + obudowa',heatshrink:'Rurka termokurczliwa',tape_install:'Taśma inst. + opaski',install_kit:'Zestaw instalacyjny standardowy',
   sim_global_500mb:'SIM Global 500MB/rok',sim_global_100mb:'SIM Global Lite 100MB/rok',sim_cam:'SIM kamera (zł/mies.)',
   ftc880:'Teltonika FTC880 (GPS Basic/Pro)',ftc305:'Teltonika FTC305 CAN (GPS Pro/Max)',ftc881:'Teltonika FTC881 10-90V',fmc880:'Teltonika FMC880',fmb920:'Teltonika FMB920 2G',
   elmes_pir_ptx50:'Elmes PTX50 PIR bezprzew.',elmes_glass_gbx1:'Elmes GBX1 zbicie szyby',elmes_contact_ctx5:'Elmes CTX5 kontaktron',elmes_siren_wss:'Elmes WSS syrena bezprzew.',
@@ -1678,6 +1745,142 @@ function renderSum() {
   document.getElementById('sum-body').innerHTML=html;
 }
 
+
+function downloadQuotePDF() {
+  const {hw,inst,travel,total,lines,monthly,billing} = calc();
+  if(total===0){alert('Najpierw skonfiguruj pakiet.');return;}
+  const fname=fv('f-fn'),lname=fv('f-ln'),phone=fv('f-ph'),email=fv('f-em');
+  const d=new Date();
+  const qn='EVT-'+Date.now().toString(36).toUpperCase().slice(-8);
+  const pkgLabel={gps:'Monitoring GPS',immo:'Immobilizer CAN',alarm:'Autoalarm',full:'System Pro'};
+  const brutto=Math.round(total*1.23);
+  const linesHtml=lines.map(l=>`
+    <tr><td>${l.n}</td>
+    <td style="text-align:right">${l.hw>0?Math.round(l.hw).toLocaleString('pl-PL')+' zł':'—'}</td>
+    <td style="text-align:right">${l.inst>0?Math.round(l.inst).toLocaleString('pl-PL')+' zł':'—'}</td>
+    <td style="text-align:right;font-weight:600">${Math.round(l.hw+l.inst).toLocaleString('pl-PL')} zł</td></tr>`).join('');
+
+  const html=`<!DOCTYPE html><html lang="pl"><head><meta charset="UTF-8">
+  <title>Wycena ${qn} – EVTelematix</title>
+  <style>
+    *{margin:0;padding:0;box-sizing:border-box}
+    body{font-family:Arial,sans-serif;font-size:10pt;color:#111;background:#fff}
+    .page{max-width:190mm;margin:0 auto;padding:14mm}
+    .hdr{display:flex;justify-content:space-between;align-items:flex-start;padding-bottom:8px;margin-bottom:14px;border-bottom:2.5px solid #07131F}
+    .logo{font-size:17pt;font-weight:700;color:#07131F}.logo b{color:#C8850A}
+    .logo-sub{font-size:8pt;color:#6B7280;margin-top:2px}
+    .contact{text-align:right;font-size:8.5pt;color:#6B7280;line-height:1.65}
+    .qno{font-size:8pt;color:#9CA3AF;margin-top:3px}
+    .section{margin:12px 0}
+    h2{font-size:10pt;font-weight:700;color:#07131F;border-left:3px solid #1A56CC;padding-left:7px;margin-bottom:7px}
+    .grid{display:grid;grid-template-columns:1fr 1fr;gap:0}
+    .row{display:flex;padding:3.5px 0;border-bottom:1px dotted #E5E7EB;font-size:9pt}
+    .lbl{color:#6B7280;min-width:130px;flex-shrink:0}
+    .val{font-weight:500}
+    table{width:100%;border-collapse:collapse;font-size:8.5pt;margin-top:4px}
+    thead tr{background:#07131F;color:#fff}
+    th{padding:5px 8px;text-align:left;font-weight:600}
+    td{padding:4px 8px;border-bottom:1px solid #F3F4F6;vertical-align:middle}
+    tr:nth-child(even) td{background:#F9FAFB}
+    .sub-row td{background:#EFF6FF!important;color:#1E40AF;font-style:italic;font-size:8pt}
+    .total-box{background:#07131F;color:#fff;border-radius:8px;padding:11px 14px;margin:12px 0;display:flex;justify-content:space-between;align-items:center}
+    .t-main{font-size:17pt;font-weight:700;color:#C8850A}
+    .t-sub{font-size:8.5pt;color:#94A3B8;margin-top:2px}
+    .t-right{text-align:right;font-size:8.5pt;color:#94A3B8;line-height:1.6}
+    .badge{display:inline-block;background:#EFF6FF;color:#1E40AF;border:1px solid #BFDBFE;border-radius:4px;padding:2px 7px;font-size:8pt;font-weight:600}
+    .note{font-size:7.5pt;color:#9CA3AF;line-height:1.65;margin-top:8px;padding-top:8px;border-top:1px solid #E5E7EB}
+    .ftr{margin-top:12px;padding-top:8px;border-top:1.5px solid #E5E7EB;display:flex;justify-content:space-between;font-size:7.5pt;color:#9CA3AF}
+    @media print{body{-webkit-print-color-adjust:exact;print-color-adjust:exact}@page{size:A4;margin:10mm}}
+  </style></head><body><div class="page">
+
+  <div class="hdr">
+    <div>
+      <div class="logo">EV<b>Telematix</b></div>
+      <div class="logo-sub">Zabezpieczenia elektroniczne vanów i kamperów</div>
+    </div>
+    <div class="contact">
+      +48 516 956 809<br>info@evtelematix.com<br>evtelematix.pl
+      <div class="qno">Nr wyceny: ${qn}<br>${d.toLocaleDateString('pl-PL')}</div>
+    </div>
+  </div>
+
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+    <div class="section">
+      <h2>Dane klienta</h2>
+      <div class="row"><span class="lbl">Imię i nazwisko</span><span class="val">${fname} ${lname}</span></div>
+      <div class="row"><span class="lbl">Telefon</span><span class="val">${phone||'—'}</span></div>
+      <div class="row"><span class="lbl">E-mail</span><span class="val">${email||'—'}</span></div>
+      ${fv('f-co')?`<div class="row"><span class="lbl">Firma</span><span class="val">${fv('f-co')}</span></div>`:''}
+      <div class="row"><span class="lbl">Miejscowość</span><span class="val">${fv('f-ci')||'—'}</span></div>
+      <div class="row"><span class="lbl">Liczba pojazdów</span><span class="val">${VC} szt.</span></div>
+    </div>
+    <div class="section">
+      <h2>Konfiguracja</h2>
+      <div class="row"><span class="lbl">Pakiet</span><span class="val"><strong>${pkgLabel[PKG]||PKG||'—'}</strong></span></div>
+      <div class="row"><span class="lbl">Instalacja</span><span class="val">${INST.type==='w'?'Warsztat':'Dojazd do klienta'}</span></div>
+      ${fv('pref-date')?`<div class="row"><span class="lbl">Termin</span><span class="val">${fv('pref-date')}</span></div>`:''}
+      ${fv('v-model')?`<div class="row"><span class="lbl">Pojazd</span><span class="val">${fv('v-model')} ${fv('v-year')}</span></div>`:''}
+      ${fv('v-body')?`<div class="row"><span class="lbl">Zabudowa</span><span class="val">${fv('v-body')}</span></div>`:''}
+      ${fv('v-vin')?`<div class="row"><span class="lbl">VIN</span><span class="val">${fv('v-vin')}</span></div>`:''}
+    </div>
+  </div>
+
+  <div class="section">
+    <h2>Szczegóły wyceny</h2>
+    <table>
+      <thead><tr><th style="width:55%">Pozycja</th><th style="text-align:right">Sprzęt</th><th style="text-align:right">Montaż</th><th style="text-align:right">Razem</th></tr></thead>
+      <tbody>${linesHtml}
+        ${travel>0?`<tr><td>Dojazd (~${INST.km||0} km × 2 strony)</td><td></td><td style="text-align:right">${Math.round(travel).toLocaleString('pl-PL')} zł</td><td style="text-align:right;font-weight:600">${Math.round(travel).toLocaleString('pl-PL')} zł</td></tr>`:''}
+      </tbody>
+      <tfoot>
+        <tr style="background:#F3F4F6"><td colspan="2"></td><td style="padding:5px 8px;text-align:right;font-size:8.5pt;color:#6B7280">Sprzęt netto:</td><td style="padding:5px 8px;text-align:right;font-weight:600">${Math.round(hw).toLocaleString('pl-PL')} zł</td></tr>
+        <tr style="background:#F3F4F6"><td colspan="2"></td><td style="padding:5px 8px;text-align:right;font-size:8.5pt;color:#6B7280">Montaż netto:</td><td style="padding:5px 8px;text-align:right;font-weight:600">${Math.round(inst).toLocaleString('pl-PL')} zł</td></tr>
+        ${monthly?`<tr class="sub-row"><td colspan="2"></td><td style="padding:5px 8px;text-align:right">Platforma / abonament:</td><td style="padding:5px 8px;text-align:right">${billing==='yearly'?Math.round(monthly*11).toLocaleString('pl-PL')+' zł/rok':monthly+' zł/mies.'}</td></tr>`:''}
+      </tfoot>
+    </table>
+  </div>
+
+  <div class="total-box">
+    <div>
+      <div style="font-size:8pt;color:#94A3B8;text-transform:uppercase;letter-spacing:.05em;margin-bottom:3px">Razem jednorazowo (netto PLN)</div>
+      <div class="t-main">${Math.round(total).toLocaleString('pl-PL')} zł</div>
+      <div class="t-sub">+ VAT 23% = <strong>${brutto.toLocaleString('pl-PL')} zł brutto</strong></div>
+    </div>
+    <div class="t-right">
+      Ceny netto PLN<br>
+      Wycena nr ${qn}<br>
+      Ważna 30 dni<br>
+      ${d.toLocaleDateString('pl-PL')}
+    </div>
+  </div>
+
+  ${monthly?`<div style="background:#EFF6FF;border:1px solid #BFDBFE;border-radius:6px;padding:8px 11px;font-size:8.5pt;color:#1E40AF;margin-bottom:10px">
+    <strong>Platforma EVTelematix:</strong> ${billing==='yearly'?Math.round(monthly*11).toLocaleString('pl-PL')+' zł/rok (11 mies. + 1 gratis)':monthly+' zł/mies.'} netto · karta SIM IoT wliczona
+  </div>`:''}
+
+  ${fv('notes')?`<div style="background:#FFFBEB;border:1px solid #FDE68A;border-radius:6px;padding:8px 11px;font-size:8.5pt;color:#92400E;margin-bottom:10px"><strong>Uwagi:</strong> ${fv('notes')}</div>`:''}
+
+  <div class="note">
+    * Wycena orientacyjna – finalna cena po bezpłatnej diagnozie pojazdu i potwierdzeniu przez instalatora.<br>
+    * Pomagamy w uzyskaniu zniżki OC/AC do 30% (wysokość zależy od indywidualnej oferty ubezpieczyciela).<br>
+    * Montaż na terenie całej Polski. Termin do uzgodnienia z instalatorem po kontakcie.
+  </div>
+
+  <div class="ftr">
+    <span>EVTelematix · +48 516 956 809 · info@evtelematix.com · evtelematix.pl</span>
+    <span>Wycena nr ${qn} · netto PLN · ${d.toLocaleDateString('pl-PL')}</span>
+  </div>
+
+  </div></body></html>`;
+
+  const w = window.open('','_blank','width=900,height=1050');
+  if(!w){alert('Zablokowano nową kartę. Zezwól na pop-upy dla tej strony.');return;}
+  w.document.write(html);
+  w.document.close();
+  w.focus();
+  setTimeout(()=>w.print(), 600);
+}
+
 let _lastEmailBody = '';
 let _lastEmailSubject = '';
 
@@ -1965,7 +2168,56 @@ function renderAdmin() {
       {k:'existing_inst',label:'Integracja z istniejącym alarmem'},
       {k:'km_rate',      label:'Dojazd (zł/km brutto)'},
     ]},
-    {title:'Teltonika – katalog sprzętu', keys:[
+    {title:'Materiały instalacyjne i złącza', keys:[
+      {k:'cable_can_m',    label:'Przewód CAN (zł/mb)'},
+      {k:'cable_power_m',  label:'Przewód zasilający (zł/mb)'},
+      {k:'connector_can',  label:'Złącze CAN (szt.)'},
+      {k:'connector_obd',  label:'Złącze OBD (szt.)'},
+      {k:'connector_tacho',label:'Złącze tachografu cyfrowego (szt.)'},
+      {k:'connector_j1939',label:'Złącze J1939 – magistrala (szt.)'},
+      {k:'fuse_holder',    label:'Bezpiecznik + obudowa'},
+      {k:'heatshrink',     label:'Rurka termokurczliwa (zestaw)'},
+      {k:'tape_install',   label:'Taśma inst. + opaski (kpl.)'},
+      {k:'install_kit',    label:'Zestaw inst. standardowy (kpl.)'},
+    ]},
+    {title:'⚙ Stawki instalacji (zł/h) – do ustawienia ręcznie', keys:[
+      {k:'labor_basic',   label:'Stawka bazowa roboczogodzina (np. GPS Basic, alarm)'},
+      {k:'labor_complex', label:'Stawka zaawansowana roboczogodzina (CAN, tacho, FMS)'},
+      {k:'labor_mobile',  label:'Stawka mobile/dojazd roboczogodzina'},
+    ]},
+    {title:'📦 Teltonika – pełny katalog (ceny sprzedaży z arkusza)', keys:[
+      {k:'telt_fmb920_hw', label:'FMB920 2G – lokalizator podstawowy'},
+      {k:'telt_fmc920_hw', label:'FMC920 4G – lokalizator Cat M1'},
+      {k:'telt_fmt100_hw', label:'FMT100 4G – bez baterii'},
+      {k:'telt_fmc880_hw', label:'FMC880 4G – zaawansowany'},
+      {k:'telt_fmb130_hw', label:'FMB130 4G BT – z Bluetooth'},
+      {k:'telt_fmc150_hw', label:'FMC150 4G BT CAN – z CAN i BT'},
+      {k:'telt_fmc650_hw', label:'FMC650 4G CAN rugged – wzmocniony'},
+      {k:'telt_ecan_hw',   label:'E CAN – czytnik CAN'},
+      {k:'telt_btsmp_hw',  label:'BT SMP – czujnik Bluetooth'},
+      {k:'telt_tat140_hw', label:'TAT140 – czujnik temperatury BT'},
+      {k:'telt_tat240_hw', label:'TAT240 – czujnik temperatury BT zaawansowany'},
+      {k:'telt_eyebacon_hw',  label:'Eye Beacon BT'},
+      {k:'telt_eyesensor_hw', label:'Eye Sensor BT (temp./wilgotność)'},
+      {k:'telt_atexbacon_hw', label:'ATEX iBEACON (strefa zagrożenia)'},
+      {k:'telt_atexsensor_hw',label:'ATEX Sensor (strefa zagrożenia)'},
+      {k:'telt_ftc921_hw', label:'FTC921 4G Cat1 – kompaktowy'},
+      {k:'telt_fmb003_hw', label:'FMB003 rugged – ekstremalny'},
+      {k:'telt_dashcam_hw',label:'Dash Cam ADAS – kamera z AI'},
+      {k:'telt_rfid_hw',   label:'RFID reader + czytnik iButton'},
+      {k:'telt_sim100_hw', label:'SIM 1/100 (1 mies.)'},
+      {k:'telt_sim500_hw', label:'SIM 5/500 (5 mies.)'},
+      {k:'telt_fuse_hw',   label:'Bezpiecznik 3A 125V (szt.)'},
+      {k:'telt_relay_hw',  label:'Przekaźnik MINI (szt.)'},
+    ]},
+    {title:'🔌 Przewody i złącza Teltonika / FMS / Tacho', keys:[
+      {k:'telt_fms_cable_hw',   label:'Kabel FMS Standard (FMS adapter)'},
+      {k:'telt_tacho_cable_hw', label:'Kabel tachografu cyfrowego (Teltonika)'},
+      {k:'telt_can_splitter_hw',label:'Splitter CAN Y-adapter'},
+      {k:'telt_j1939_cable_hw', label:'Kabel J1939 (magistrala SAE J1939)'},
+      {k:'telt_lvcan_hw',       label:'LVCAN000 – moduł CAN osobowy'},
+    ]},
+    {title:'Teltonika – katalog sprzętu (referencyjny EUR)', keys:[
       {k:'ftc880', eur:46,  label:'Teltonika FTC880 (GPS Basic/Pro 4G)'},
       {k:'ftc305', eur:69,  label:'Teltonika FTC305 CAN (GPS Pro/Max)'},
       {k:'ftc881', eur:47,  label:'Teltonika FTC881 10–90V DC'},
@@ -1983,7 +2235,7 @@ function renderAdmin() {
     'glass_hw','glass_inst','gas_hw','gas_inst','gas_sleep_hw','gas_sleep_inst',
     'temp_hw','temp_inst','tow_hw','tow_inst','prox_hw','prox_inst',
     'rfid_hw','rfid_inst','sos_hw','sos_inst','cam_hw','cam_inst','eye_hw','eye_inst',
-    'antijam_hw','antijam_inst','existing_inst','km_rate','ftc880','ftc305']);
+    'antijam_hw','antijam_inst','existing_inst','km_rate','ftc880','ftc305','install_kit','connector_tacho','connector_j1939']);
 
   // ── Top header: currency + formspree ──────────────────────
   let html = `
@@ -2042,6 +2294,43 @@ function renderAdmin() {
       <div style="font-size:.62rem;color:${localStorage.getItem('evt_formspree')?'var(--green)':'var(--amber)'};margin-top:.2rem">
         ${localStorage.getItem('evt_formspree')?'✓ Skonfigurowane':'⚠ Nie skonfigurowane – formspree.io'}
       </div>
+    </div>
+  </div>`;
+
+  // ── Quick labor rate editor ─────────────────────────────────
+  html += `<div style="background:#FFF8E7;border:1px solid var(--abr);border-radius:var(--rs);padding:.65rem .85rem;margin-bottom:.75rem">
+    <div style="font-size:.72rem;font-weight:700;color:var(--amber);margin-bottom:.38rem">⚙ Szybka edycja stawek instalacji</div>
+    <div style="display:flex;gap:.75rem;flex-wrap:wrap;align-items:flex-end">
+      <div>
+        <div style="font-size:.63rem;color:var(--muted);margin-bottom:.18rem">Podstawowa (zł/h)</div>
+        <div style="display:flex;align-items:center;gap:.3rem">
+          <input type="number" id="ql-basic" value="${P.labor_basic||150}" min="0" step="5"
+            style="width:72px;border:1.5px solid var(--border);border-radius:var(--rs);padding:.28rem .38rem;font-size:.82rem;text-align:center">
+          <span style="font-size:.68rem;color:var(--muted)">zł/h</span>
+        </div>
+      </div>
+      <div>
+        <div style="font-size:.63rem;color:var(--muted);margin-bottom:.18rem">CAN/Tacho (zł/h)</div>
+        <div style="display:flex;align-items:center;gap:.3rem">
+          <input type="number" id="ql-complex" value="${P.labor_complex||200}" min="0" step="5"
+            style="width:72px;border:1.5px solid var(--border);border-radius:var(--rs);padding:.28rem .38rem;font-size:.82rem;text-align:center">
+          <span style="font-size:.68rem;color:var(--muted)">zł/h</span>
+        </div>
+      </div>
+      <div>
+        <div style="font-size:.63rem;color:var(--muted);margin-bottom:.18rem">Mobile/dojazd (zł/h)</div>
+        <div style="display:flex;align-items:center;gap:.3rem">
+          <input type="number" id="ql-mobile" value="${P.labor_mobile||250}" min="0" step="5"
+            style="width:72px;border:1.5px solid var(--border);border-radius:var(--rs);padding:.28rem .38rem;font-size:.82rem;text-align:center">
+          <span style="font-size:.68rem;color:var(--muted)">zł/h</span>
+        </div>
+      </div>
+      <button class="abtn abtn-pri" onclick="saveLaborRates()" style="padding:.32rem .85rem;font-size:.73rem">💾 Zapisz stawki</button>
+      <div style="font-size:.67rem;color:var(--green);align-self:center" id="labor-saved" style="display:none"></div>
+    </div>
+    <div style="font-size:.63rem;color:var(--muted);margin-top:.3rem;line-height:1.55">
+      Stawki są informacyjne – pomagają kalkulować czas montażu. 
+      Np. GPS Basic = 2h × ${P.labor_basic||150} zł = ${(P.labor_basic||150)*2} zł montaż.
     </div>
   </div>`;
 
@@ -2319,6 +2608,23 @@ function previewEur(rate) {
 
 
 
+function saveLaborRates(){
+  const b=parseFloat(document.getElementById('ql-basic')?.value)||150;
+  const c=parseFloat(document.getElementById('ql-complex')?.value)||200;
+  const m=parseFloat(document.getElementById('ql-mobile')?.value)||250;
+  // Update P and input fields
+  P.labor_basic=b; P.labor_complex=c; P.labor_mobile=m;
+  ['basic','complex','mobile'].forEach(t=>{
+    const el=document.getElementById('ap-labor_'+t);
+    if(el)el.value=t==='basic'?b:t==='complex'?c:m;
+  });
+  // Save to storage
+  const saved=JSON.parse(localStorage.getItem('evt_p_v8')||'{}');
+  saved.labor_basic=b;saved.labor_complex=c;saved.labor_mobile=m;
+  localStorage.setItem('evt_p_v8',JSON.stringify(saved));
+  const el=document.getElementById('labor-saved');
+  if(el){el.textContent='✓ Zapisano!';el.style.display='block';setTimeout(()=>el.style.display='none',2500);}
+}
 function saveFormspree(){
   const ep=document.getElementById('fs-endpoint')?.value||'';
   localStorage.setItem('evt_formspree',ep.trim());

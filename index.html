@@ -1878,222 +1878,445 @@ function doLogin(){
 }
 function renderAdmin() {
   const eurRate = parseFloat(localStorage.getItem('evt_eur_rate')||'4.25');
+  const gbpRate = parseFloat(localStorage.getItem('evt_gbp_rate')||'5.10');
   const eurDate = localStorage.getItem('evt_eur_date')||'—';
   const customItems = JSON.parse(localStorage.getItem('evt_custom_v9')||'[]');
 
-  // All price groups with EUR refs where applicable
-  const grps=[
+  // ── Price groups ─────────────────────────────────────────
+  const grps = [
     {title:'Monitoring GPS – sprzęt i montaż', keys:[
-      {k:'gps_b_hw',eur:46,label:'GPS Basic – sprzęt (FTC880)'},{k:'gps_b_inst',label:'GPS Basic – montaż'},
-      {k:'gps_p_hw',eur:69,label:'GPS Pro – sprzęt (FTC305 CAN)'},{k:'gps_p_inst',label:'GPS Pro – montaż'},
-      {k:'gps_x_hw',eur:69,label:'GPS Pro Max – sprzęt (FTC305+)'},{k:'gps_x_inst',label:'GPS Pro Max – montaż'},
+      {k:'gps_b_hw',  eur:46,   label:'GPS Basic – sprzęt (Teltonika FTC880)'},
+      {k:'gps_b_inst',           label:'GPS Basic – montaż'},
+      {k:'gps_p_hw',  eur:69,   label:'GPS Pro – sprzęt (Teltonika FTC305 CAN)'},
+      {k:'gps_p_inst',           label:'GPS Pro – montaż'},
+      {k:'gps_x_hw',  eur:69,   label:'GPS Pro Max – sprzęt (FTC305+)'},
+      {k:'gps_x_inst',           label:'GPS Pro Max – montaż'},
     ]},
     {title:'Abonament platformy GPS', keys:[
-      {k:'sub_b',label:'Abonament Basic (zł/mies.)'},{k:'sub_p',label:'Abonament Pro (zł/mies.)'},{k:'sub_x',label:'Abonament Pro Max (zł/mies.)'},
-      {k:'etoll_m',label:'eToll miesięcznie (zł/mies.)'},{k:'etoll_y',label:'eToll roczny (zł/rok)'},
+      {k:'sub_b',  label:'Abonament Basic (zł/mies.)'},
+      {k:'sub_p',  label:'Abonament Pro (zł/mies.)'},
+      {k:'sub_x',  label:'Abonament Pro Max (zł/mies.)'},
+      {k:'etoll_m',label:'eToll miesięcznie (zł/mies.)'},
+      {k:'etoll_y',label:'eToll roczny (zł/rok)'},
     ]},
-    {title:'Karty SIM', keys:[
-      {k:'sim_global_500mb',eur:11,label:'SIM Global 500MB / rok (135 krajów, 5 lat)'},{k:'sim_global_100mb',eur:5,label:'SIM Global Lite 100MB / rok'},
-      {k:'sim_cam',label:'SIM rozszerzony kamera (zł/mies. dopłata)'},
+    {title:'Karty SIM (Teltonika)', keys:[
+      {k:'sim_global_500mb', eur:11,  label:'SIM Global 500MB / rok (135 krajów, 5 lat)'},
+      {k:'sim_global_100mb', eur:5,   label:'SIM Global Lite 100MB / rok'},
+      {k:'sim_cam',                    label:'Dopłata SIM kamera (zł/mies.)'},
     ]},
     {title:'Immobilizer CAN', keys:[
-      {k:'immo_hw',label:'Immobilizer CAN – sprzęt (CANblu/SEO)'},{k:'immo_inst',label:'Immobilizer CAN – montaż'},
-      {k:'brylok',label:'Brylok elektroniczny (szt.)'},
+      {k:'immo_hw',   label:'Immobilizer CAN – sprzęt (CANblu / SEO)'},
+      {k:'immo_inst', label:'Immobilizer CAN – montaż'},
+      {k:'brylok',    label:'Brylok elektroniczny (za szt.)'},
     ]},
     {title:'Immobilizer analogowy (przekaźnik)', keys:[
-      {k:'immo_a_hw',eur:2.5,label:'Immobilizer analogowy – sprzęt (relay 12V)'},{k:'immo_a_inst',label:'Immobilizer analogowy – montaż'},
+      {k:'immo_a_hw',  eur:2.5, label:'Immobilizer analogowy – sprzęt (relay 12V)'},
+      {k:'immo_a_inst',          label:'Immobilizer analogowy – montaż'},
     ]},
-    {title:'Alarm CAN', keys:[
-      {k:'alarm_hw',label:'Alarm CAN – sprzęt'},{k:'alarm_inst',label:'Alarm CAN – montaż'},
-      {k:'siren_hw',label:'Syrena piezo (szt. – sprzęt)'},{k:'siren_inst',label:'Syrena piezo (szt. – montaż)'},
+    {title:'Alarm CAN + syreny', keys:[
+      {k:'alarm_hw',   label:'Alarm CAN – sprzęt'},
+      {k:'alarm_inst', label:'Alarm CAN – montaż'},
+      {k:'siren_hw',   label:'Syrena piezo (szt. – sprzęt)'},
+      {k:'siren_inst', label:'Syrena piezo (szt. – montaż)'},
       {k:'strobe_inst',label:'Stroboskop LED – montaż'},
     ]},
     {title:'Kontaktrony', keys:[
-      {k:'cbw_hw',eur_ref:'Elmes CTX5: 54,60 zł hurt',label:'Kontaktron bezprzew. – sprzęt'},{k:'cbw_inst',label:'Kontaktron bezprzew. – montaż'},
-      {k:'cw_hw',label:'Kontaktron kablowy – sprzęt'},{k:'cw_inst',label:'Kontaktron kablowy – montaż (od)'},
+      {k:'cbw_hw',  label:'Kontaktron bezprzewodowy – sprzęt'},
+      {k:'cbw_inst',label:'Kontaktron bezprzewodowy – montaż'},
+      {k:'cw_hw',   label:'Kontaktron kablowy – sprzęt'},
+      {k:'cw_inst', label:'Kontaktron kablowy – montaż (od)'},
     ]},
     {title:'Czujniki PIR / Zbicie szyby', keys:[
-      {k:'pir_hw',eur_ref:'Elmes PTX50: 79 zł hurt',label:'PIR wewnętrzny – sprzęt'},{k:'pir_inst',label:'PIR wewnętrzny – montaż'},
-      {k:'pirx_hw',label:'PIR zewnętrzny – sprzęt'},{k:'pirx_inst',label:'PIR zewnętrzny – montaż'},
-      {k:'glass_hw',eur_ref:'Elmes GBX1: 109,20 zł hurt',label:'Zbicie szyby – sprzęt'},{k:'glass_inst',label:'Zbicie szyby – montaż'},
+      {k:'pir_hw',   label:'PIR wewnętrzny – sprzęt'},
+      {k:'pir_inst', label:'PIR wewnętrzny – montaż'},
+      {k:'pirx_hw',  label:'PIR zewnętrzny – sprzęt'},
+      {k:'pirx_inst',label:'PIR zewnętrzny – montaż'},
+      {k:'glass_hw', label:'Zbicie szyby – sprzęt'},
+      {k:'glass_inst',label:'Zbicie szyby – montaż'},
     ]},
     {title:'Czujniki gazu', keys:[
-      {k:'gas_hw',label:'Czujnik gazu LPG/CO – sprzęt'},{k:'gas_inst',label:'Czujnik gazu LPG/CO – montaż'},
-      {k:'gas_sleep_hw',label:'Czujnik gazu usypiającego – sprzęt'},{k:'gas_sleep_inst',label:'Czujnik gazu usypiającego – montaż'},
+      {k:'gas_hw',        label:'Czujnik gazu LPG/CO – sprzęt'},
+      {k:'gas_inst',      label:'Czujnik gazu LPG/CO – montaż'},
+      {k:'gas_sleep_hw',  label:'Czujnik gazu usypiającego – sprzęt'},
+      {k:'gas_sleep_inst',label:'Czujnik gazu usypiającego – montaż'},
     ]},
     {title:'Czujniki zaawansowane', keys:[
-      {k:'temp_hw',label:'Czujnik temperatury – sprzęt'},{k:'temp_inst',label:'Czujnik temperatury – montaż'},
-      {k:'tow_hw',label:'Czujnik holowania 3D – sprzęt'},{k:'tow_inst',label:'Czujnik holowania 3D – montaż'},
-      {k:'prox_hw',label:'Czujnik zbliżeniowy zewn. – sprzęt'},{k:'prox_inst',label:'Czujnik zbliżeniowy – montaż'},
+      {k:'temp_hw',   label:'Czujnik temperatury – sprzęt'},
+      {k:'temp_inst', label:'Czujnik temperatury – montaż'},
+      {k:'tow_hw',    label:'Czujnik holowania 3D – sprzęt'},
+      {k:'tow_inst',  label:'Czujnik holowania 3D – montaż'},
+      {k:'prox_hw',   label:'Czujnik zbliżeniowy zewn. – sprzęt'},
+      {k:'prox_inst', label:'Czujnik zbliżeniowy – montaż'},
     ]},
     {title:'RFID / SOS / Kamera / Eye Sensor', keys:[
-      {k:'rfid_hw',label:'ID kierowcy RFID/iButton – sprzęt'},{k:'rfid_inst',label:'ID kierowcy – montaż'},
-      {k:'sos_hw',label:'Przycisk SOS – sprzęt'},{k:'sos_inst',label:'Przycisk SOS – montaż'},
-      {k:'cam_hw',label:'Kamera zdarzeń – sprzęt'},{k:'cam_inst',label:'Kamera – montaż'},
-      {k:'eye_hw',label:'Eye Sensor BT – sprzęt'},{k:'eye_inst',label:'Eye Sensor – aktywacja'},
+      {k:'rfid_hw',  label:'ID kierowcy RFID/iButton – sprzęt'},
+      {k:'rfid_inst',label:'ID kierowcy – montaż'},
+      {k:'sos_hw',   label:'Przycisk SOS – sprzęt'},
+      {k:'sos_inst', label:'Przycisk SOS – montaż'},
+      {k:'cam_hw',   label:'Kamera zdarzeń – sprzęt'},
+      {k:'cam_inst', label:'Kamera – montaż'},
+      {k:'cam_sim',  label:'Dopłata SIM kamera / mies.'},
+      {k:'eye_hw',   label:'Eye Sensor BT – sprzęt'},
+      {k:'eye_inst', label:'Eye Sensor – aktywacja'},
     ]},
     {title:'Anti-Jamming / Integracja / Dojazd', keys:[
-      {k:'antijam_hw',label:'Anti-Jamming GNSS – sprzęt'},{k:'antijam_inst',label:'Anti-Jamming – montaż'},
-      {k:'existing_inst',label:'Integracja z istniejącym alarmem'},{k:'km_rate',label:'Dojazd (zł/km brutto)'},
+      {k:'antijam_hw',   label:'Anti-Jamming GNSS – sprzęt'},
+      {k:'antijam_inst', label:'Anti-Jamming – montaż'},
+      {k:'existing_inst',label:'Integracja z istniejącym alarmem'},
+      {k:'km_rate',      label:'Dojazd (zł/km brutto)'},
     ]},
-    {title:'Teltonika – katalog sprzętu (EUR)', keys:[
-      {k:'ftc880',eur:46,label:'Teltonika FTC880 (GPS Basic/Pro 4G)'},{k:'ftc305',eur:69,label:'Teltonika FTC305 CAN (GPS Pro/Max)'},
-      {k:'ftc881',eur:47,label:'Teltonika FTC881 10–90V DC'},{k:'fmc880',eur:50,label:'Teltonika FMC880 standard'},
-      {k:'fmb920',eur:22,label:'Teltonika FMB920 2G ekonomiczny'},{k:'relay_12v',eur:2.5,label:'Przekaźnik 12V immo analog. (MOQ 10)'},
+    {title:'Teltonika – katalog sprzętu', keys:[
+      {k:'ftc880', eur:46,  label:'Teltonika FTC880 (GPS Basic/Pro 4G)'},
+      {k:'ftc305', eur:69,  label:'Teltonika FTC305 CAN (GPS Pro/Max)'},
+      {k:'ftc881', eur:47,  label:'Teltonika FTC881 10–90V DC'},
+      {k:'fmc880', eur:50,  label:'Teltonika FMC880 standard'},
+      {k:'fmb920', eur:22,  label:'Teltonika FMB920 2G ekonomiczny'},
+      {k:'relay_12v',eur:2.5,label:'Przekaźnik 12V immo analog. (MOQ 10)'},
     ]},
   ];
 
-  const usedKeys = new Set(['gps_b_hw','gps_b_inst','gps_p_hw','gps_p_inst','gps_x_hw','gps_x_inst','sub_b','sub_p','sub_x','etoll_m','etoll_y','sim_global_500mb','sim_cam','immo_hw','immo_inst','brylok','immo_a_hw','immo_a_inst','alarm_hw','alarm_inst','siren_hw','siren_inst','strobe_inst','cbw_hw','cbw_inst','cw_hw','cw_inst','pir_hw','pir_inst','pirx_hw','pirx_inst','glass_hw','glass_inst','gas_hw','gas_inst','gas_sleep_hw','gas_sleep_inst','temp_hw','temp_inst','tow_hw','tow_inst','prox_hw','prox_inst','rfid_hw','rfid_inst','sos_hw','sos_inst','cam_hw','cam_inst','eye_hw','eye_inst','antijam_hw','antijam_inst','existing_inst','km_rate','ftc880','ftc305']);
+  const usedKeys = new Set(['gps_b_hw','gps_b_inst','gps_p_hw','gps_p_inst','gps_x_hw','gps_x_inst',
+    'sub_b','sub_p','sub_x','etoll_m','etoll_y','sim_global_500mb','sim_cam',
+    'immo_hw','immo_inst','brylok','immo_a_hw','immo_a_inst',
+    'alarm_hw','alarm_inst','siren_hw','siren_inst','strobe_inst',
+    'cbw_hw','cbw_inst','cw_hw','cw_inst','pir_hw','pir_inst','pirx_hw','pirx_inst',
+    'glass_hw','glass_inst','gas_hw','gas_inst','gas_sleep_hw','gas_sleep_inst',
+    'temp_hw','temp_inst','tow_hw','tow_inst','prox_hw','prox_inst',
+    'rfid_hw','rfid_inst','sos_hw','sos_inst','cam_hw','cam_inst','eye_hw','eye_inst',
+    'antijam_hw','antijam_inst','existing_inst','km_rate','ftc880','ftc305']);
 
+  // ── Top header: currency + formspree ──────────────────────
   let html = `
-  <div style="display:grid;grid-template-columns:1fr 1fr;gap:.6rem;margin-bottom:.85rem">
-    <div style="background:var(--gbg);border:1px solid var(--gbr);border-radius:var(--rs);padding:.7rem">
-      <div style="font-size:.72rem;font-weight:700;color:var(--green);margin-bottom:.38rem">💱 Przelicznik EUR → PLN</div>
-      <div style="display:flex;align-items:center;gap:.4rem;flex-wrap:wrap">
-        <span style="font-size:.73rem">1 EUR =</span>
-        <input type="number" id="eur-rate" value="${eurRate.toFixed(2)}" step="0.01" min="3" max="6"
-          style="width:72px;border:1.5px solid var(--border);border-radius:var(--rs);padding:.28rem .4rem;font-size:.82rem;text-align:center"
-          oninput="previewEur(this.value)">
-        <span style="font-size:.73rem">PLN netto</span>
-        <button class="abtn abtn-pri" onclick="saveEurRate()" style="padding:.28rem .75rem;font-size:.71rem">Zapisz</button>
+  <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:.55rem;margin-bottom:.85rem">
+
+    <!-- EUR -->
+    <div style="background:var(--gbg);border:1px solid var(--gbr);border-radius:var(--rs);padding:.65rem">
+      <div style="font-size:.7rem;font-weight:700;color:var(--green);margin-bottom:.32rem">💱 Kurs EUR → PLN</div>
+      <div style="display:flex;align-items:center;gap:.3rem;flex-wrap:wrap">
+        <span style="font-size:.72rem">1 EUR =</span>
+        <input type="number" id="eur-rate" value="${eurRate.toFixed(4)}" step="0.001" min="3" max="7"
+          style="width:72px;border:1.5px solid var(--border);border-radius:var(--rs);padding:.26rem .38rem;font-size:.8rem;text-align:center"
+          oninput="liveConvert()">
+        <span style="font-size:.72rem">PLN</span>
+        <button class="abtn abtn-pri" onclick="saveEurRate()" style="padding:.26rem .65rem;font-size:.69rem">Zapisz</button>
       </div>
-      <div style="font-size:.65rem;color:var(--muted);margin-top:.28rem">Ostatnia zmiana: <strong>${eurDate}</strong></div>
-      <div id="eur-preview" style="font-size:.67rem;color:var(--green);margin-top:.18rem;line-height:1.6">
-        FTC880: ${Math.round(46*eurRate)} zł · FTC305 CAN: ${Math.round(69*eurRate)} zł · FTC881: ${Math.round(47*eurRate)} zł<br>
-        SIM 500MB/rok: ${Math.round(11*eurRate)} zł · Relay 12V: ${Math.round(2.5*eurRate)} zł
+      <div style="font-size:.64rem;color:var(--muted);margin-top:.24rem">Zm.: <strong>${eurDate}</strong></div>
+      <div id="eur-preview" style="font-size:.64rem;color:var(--green);margin-top:.16rem;line-height:1.55">
+        FTC880: ~${Math.round(46*eurRate)} zł &nbsp;·&nbsp; FTC305: ~${Math.round(69*eurRate)} zł<br>
+        SIM 500MB: ~${Math.round(11*eurRate)} zł &nbsp;·&nbsp; Relay: ~${Math.round(2.5*eurRate)} zł
       </div>
     </div>
-    <div style="background:#EFF6FF;border:1px solid #BFDBFE;border-radius:var(--rs);padding:.7rem">
-      <div style="font-size:.72rem;font-weight:700;color:var(--blue);margin-bottom:.38rem">📋 Legenda</div>
-      <div style="font-size:.67rem;color:var(--text);line-height:1.7">
-        <span style="background:#EFF6FF;border:1px solid #BFDBFE;border-radius:3px;padding:.1rem .3rem;color:var(--blue);font-weight:600">Niebieskie</span> = używane w kalkulatorze<br>
-        Hasło: <strong>5521</strong> · Leady: <code style="font-size:.63rem">evt_leads_v8</code><br>
-        Ceny: <code style="font-size:.63rem">evt_p_v8</code> · Własne: <code style="font-size:.63rem">evt_custom_v9</code><br>
-        EUR ref = cena zakupu netto. Marża = (klient−zakup)/klient
+
+    <!-- GBP -->
+    <div style="background:#F5F3FF;border:1px solid #DDD6FE;border-radius:var(--rs);padding:.65rem">
+      <div style="font-size:.7rem;font-weight:700;color:#6D28D9;margin-bottom:.32rem">💷 Kurs GBP → PLN</div>
+      <div style="display:flex;align-items:center;gap:.3rem;flex-wrap:wrap">
+        <span style="font-size:.72rem">1 GBP =</span>
+        <input type="number" id="gbp-rate" value="${gbpRate.toFixed(4)}" step="0.001" min="4" max="8"
+          style="width:72px;border:1.5px solid var(--border);border-radius:var(--rs);padding:.26rem .38rem;font-size:.8rem;text-align:center"
+          oninput="liveConvert()">
+        <span style="font-size:.72rem">PLN</span>
+        <button class="abtn" onclick="saveGbpRate()" style="padding:.26rem .65rem;font-size:.69rem;background:#6D28D9;color:#fff;border:none;border-radius:var(--rs);font-family:'Syne',sans-serif;font-weight:700;cursor:pointer">Zapisz</button>
+      </div>
+      <div style="font-size:.64rem;color:var(--muted);margin-top:.24rem">Używaj przy zakupach z UK.</div>
+      <div id="gbp-preview" style="font-size:.64rem;color:#6D28D9;margin-top:.16rem;line-height:1.55">
+        100 GBP = ${Math.round(100*gbpRate)} zł &nbsp;·&nbsp; 500 GBP = ${Math.round(500*gbpRate)} zł
+      </div>
+    </div>
+
+    <!-- Info + Formspree -->
+    <div style="background:#EFF6FF;border:1px solid #BFDBFE;border-radius:var(--rs);padding:.65rem">
+      <div style="font-size:.7rem;font-weight:700;color:var(--blue);margin-bottom:.32rem">📋 Info panelu</div>
+      <div style="font-size:.64rem;color:var(--text);line-height:1.65;margin-bottom:.35rem">
+        <span style="background:#EFF6FF;border:1px solid #BFDBFE;border-radius:3px;padding:.08rem .28rem;color:var(--blue);font-weight:600">Niebieskie wiersze</span> = w kalkulatorze<br>
+        <strong>Marża %</strong> – edytuj ręcznie lub przez cenę klienta<br>
+        Hasło: <strong>5521</strong>
+      </div>
+      <div style="font-size:.69rem;font-weight:600;color:var(--text);margin-bottom:.22rem">📨 Formspree endpoint:</div>
+      <div style="display:flex;gap:.3rem">
+        <input type="text" id="fs-endpoint" value="${localStorage.getItem('evt_formspree')||''}" 
+          placeholder="https://formspree.io/f/…"
+          style="flex:1;border:1.5px solid var(--border);border-radius:var(--rs);padding:.26rem .4rem;font-size:.68rem">
+        <button class="abtn abtn-pri" onclick="saveFormspree()" style="padding:.26rem .6rem;font-size:.68rem;white-space:nowrap">Zapisz</button>
+      </div>
+      <div style="font-size:.62rem;color:${localStorage.getItem('evt_formspree')?'var(--green)':'var(--amber)'};margin-top:.2rem">
+        ${localStorage.getItem('evt_formspree')?'✓ Skonfigurowane':'⚠ Nie skonfigurowane – formspree.io'}
       </div>
     </div>
   </div>`;
 
-  // Price tables
+  // ── Price tables ──────────────────────────────────────────
   grps.forEach(grp => {
     html += `<div class="adm-sec">${grp.title}</div>
     <table class="pt"><thead><tr>
-      <th>Element</th><th>EUR ref</th><th>Zakup netto zł</th><th style="background:#EFF6FF">Cena klienta netto zł</th><th>Marża %</th><th>Marża zł</th><th>Zarobek</th>
+      <th style="min-width:180px">Element</th>
+      <th>Waluta zakupu</th>
+      <th>Kwota zakupu</th>
+      <th>Zakup w PLN netto</th>
+      <th style="background:#EFF6FF;color:var(--blue)">Cena klienta PLN netto</th>
+      <th>Marża %<br><span style="font-weight:400;font-size:.58rem">(edytuj ręcznie)</span></th>
+      <th>Marża zł</th>
+      <th>Zarobek netto</th>
     </tr></thead><tbody>`;
+
     grp.keys.forEach(item => {
-      const {k, eur, eur_ref, label} = item;
-      const buy = BUY[k]||0;
-      const cl = P[k]||0;
-      const eurPlnRef = eur ? Math.round(eur*eurRate) : 0;
-      const mp = buy>0&&cl>0 ? Math.round((cl-buy)/cl*100) : (cl>0&&buy===0?100:0);
-      const mz = cl>0&&buy>=0 ? Math.round(cl-buy) : 0;
-      const col = mp>=60?'var(--green)':mp>=35?'var(--amber)':mp>=0?'#DC2626':'var(--muted)';
-      const isUsed = usedKeys.has(k);
+      const {k, eur, label} = item;
+      const buyRef   = BUY[k]||0;
+      const cl       = P[k]||0;
+      const storedCur= localStorage.getItem('evt_cur_'+k)||'PLN';
+      const storedAmt= parseFloat(localStorage.getItem('evt_amt_'+k)||buyRef)||buyRef;
+      const buyPln   = calcBuyPln(storedCur, storedAmt, eurRate, gbpRate);
+      const mp       = cl>0&&buyPln>0 ? Math.round((cl-buyPln)/cl*100) : cl>0?100:0;
+      const mz       = cl>0 ? Math.round(cl-buyPln) : 0;
+      const col      = mp>=60?'var(--green)':mp>=35?'var(--amber)':buyPln>0?'var(--red)':'var(--muted)';
+      const isUsed   = usedKeys.has(k);
+
       html += `<tr${isUsed?' class="hi"':''}>
-        <td style="font-size:.69rem">${label||k}${isUsed?'':' <span style="font-size:.58rem;color:var(--muted)">(ref.)</span>'}</td>
-        <td style="font-size:.67rem;color:var(--muted)">${eur?eur+' EUR<br><span style="color:var(--blue);font-size:.62rem">≈'+eurPlnRef+' zł</span>':eur_ref?`<span style="font-size:.62rem">${eur_ref}</span>`:'—'}</td>
-        <td style="font-size:.67rem;color:var(--muted)">${buy>0?buy+' zł':'—'}</td>
-        <td style="background:#F0F7FF"><input class="pi" type="number" id="ap-${k}" value="${cl}" min="0" step="1" oninput="recM('${k}',${buy})"></td>
-        <td><span class="mv" id="mp-${k}" style="color:${col}">${mp>0?mp+'%':'—'}</span></td>
-        <td><span class="mv" id="mz-${k}" style="color:${col}">${mz>0?'+'+mz+' zł':'—'}</span></td>
-        <td style="font-size:.67rem;font-weight:600;color:var(--green)">${mz>0?'+'+(mz).toLocaleString('pl-PL')+' zł':'—'}</td>
+        <td style="font-size:.68rem;line-height:1.3">${label}</td>
+        <td>
+          <select id="cur-${k}" onchange="onCurChange('${k}')"
+            style="border:1px solid var(--border);border-radius:4px;padding:.2rem .3rem;font-size:.7rem;background:#fff">
+            <option ${storedCur==='PLN'?'selected':''}>PLN</option>
+            <option ${storedCur==='EUR'?'selected':''}>EUR</option>
+            <option ${storedCur==='GBP'?'selected':''}>GBP</option>
+          </select>
+        </td>
+        <td>
+          <input type="number" id="amt-${k}" value="${storedAmt||''}" min="0" step="0.01"
+            placeholder="${eur?eur+' EUR':buyRef||0}"
+            style="width:76px;border:1px solid var(--border);border-radius:4px;padding:.22rem .35rem;font-size:.74rem;text-align:center"
+            oninput="onAmtChange('${k}')">
+        </td>
+        <td style="font-size:.7rem;font-weight:500" id="pln-${k}">${buyPln>0?buyPln.toLocaleString('pl-PL')+' zł':'—'}</td>
+        <td style="background:#F0F7FF">
+          <input class="pi" type="number" id="ap-${k}" value="${cl}" min="0" step="1"
+            oninput="onSellChange('${k}')">
+        </td>
+        <td>
+          <div style="display:flex;align-items:center;gap:.22rem">
+            <input type="number" id="mp-inp-${k}" value="${mp}" min="-100" max="200" step="1"
+              style="width:48px;border:1px solid var(--border);border-radius:4px;padding:.22rem .28rem;font-size:.74rem;text-align:center"
+              oninput="onMarginChange('${k}')">
+            <span style="font-size:.68rem;color:var(--muted)">%</span>
+            <span class="mv" id="mp-${k}" style="color:${col};font-size:.68rem">${mp>0?mp+'%':'—'}</span>
+          </div>
+        </td>
+        <td><span class="mv" id="mz-${k}" style="color:${col}">${mz>0?'+'+mz.toLocaleString('pl-PL')+' zł':'—'}</span></td>
+        <td style="font-size:.67rem;font-weight:600;color:var(--green)" id="earn-${k}">${mz>0?mz.toLocaleString('pl-PL')+' zł':'—'}</td>
       </tr>`;
     });
     html += '</tbody></table>';
   });
 
-  // SEO Electronics
+  // ── Suppliers ─────────────────────────────────────────────
   html += `<div class="adm-sec">🔒 SEO Electronics – immobilizery CAN netto</div>
   <table class="pt"><thead><tr><th>Model / P/N</th><th>Cena netto</th><th>Opis</th></tr></thead><tbody>
-  <tr class="hi"><td>CANblu II + 2 breloki (7977A267)</td><td>531,50 zł</td><td>CAN Bluetooth – używany w Immo CAN</td></tr>
-  <tr class="hi"><td>SEO CANi U335_76_10 (78761001)</td><td>301,50 zł</td><td>CAN immobilizer z PIN</td></tr>
-  <tr class="hi"><td>SEO CANi U335_76_05 (78760504)</td><td>301,50 zł</td><td>CAN do GPS/GSM bez PIN</td></tr>
-  <tr><td>CANblu I + 1 brelok (7977A264)</td><td>466,50 zł</td><td>CANblu pojedynczy</td></tr>
-  <tr><td>CANblu bez breloków (7977A261)</td><td>401,50 zł</td><td>—</td></tr>
+  <tr class="hi"><td>CANblu II + 2 breloki (7977A267)</td><td>531,50 zł</td><td>CAN Bluetooth – główny w kalkulatorze</td></tr>
+  <tr class="hi"><td>SEO CANi U335_76_10</td><td>301,50 zł</td><td>CAN z PIN</td></tr>
   <tr class="hi"><td>ID Transmitter – brylok (01000001)</td><td>65,00 zł</td><td>Brylok osobno</td></tr>
-  <tr><td>Programming Interface (02000001)</td><td>110,00 zł</td><td>Programator</td></tr>
-  </tbody></table>`;
+  <tr><td>CANblu I + 1 brelok</td><td>466,50 zł</td><td>—</td></tr>
+  <tr><td>Programming Interface</td><td>110,00 zł</td><td>Programator</td></tr>
+  </tbody></table>
 
-  // Elmes
-  html += `<div class="adm-sec">📡 Elmes Elektronik – hurt netto</div>
+  <div class="adm-sec">📡 Elmes Elektronik – hurt netto</div>
   <table class="pt"><thead><tr><th>Kod</th><th>Hurt netto</th><th>Detal</th><th>Opis</th></tr></thead><tbody>
   <tr class="hi"><td>PTX50</td><td>79,00 zł</td><td>89,00 zł</td><td>PIR bezprzewodowy 100m</td></tr>
   <tr class="hi"><td>GBX1</td><td>109,20 zł</td><td>139,10 zł</td><td>Zbicie szyby bezprzew.</td></tr>
   <tr class="hi"><td>CTX5</td><td>54,60 zł</td><td>67,90 zł</td><td>Kontaktron magnetyczny bezprzew.</td></tr>
   <tr><td>CTX3H</td><td>48,90 zł</td><td>62,40 zł</td><td>Kontaktron biały</td></tr>
   <tr class="hi"><td>WSS</td><td>193,00 zł</td><td>240,00 zł</td><td>Sygnalizator bezprzew.</td></tr>
-  <tr><td>CR123A</td><td>8,10 zł</td><td>9,80 zł</td><td>Bateria do CTX5, PTX50</td></tr>
+  <tr><td>CR123A bateria</td><td>8,10 zł</td><td>9,80 zł</td><td>Do CTX5, PTX50</td></tr>
   </tbody></table>`;
 
-  // Custom items
+  // ── Custom items ──────────────────────────────────────────
   html += `<div class="adm-sec">➕ Własne pozycje</div>
-  <table class="pt" id="custom-tbl"><thead><tr><th>Nazwa</th><th>Opis</th><th>Sprzęt netto zł</th><th>Montaż netto zł</th><th>Kategoria</th><th></th></tr></thead>
-  <tbody id="custom-body">
-  ${customItems.map((ci,i)=>`<tr>
-    <td><input style="width:130px;border:1px solid var(--border);border-radius:4px;padding:.2rem .35rem;font-size:.69rem" value="${ci.name||''}" oninput="editCustom(${i},'name',this.value)"></td>
-    <td><input style="width:170px;border:1px solid var(--border);border-radius:4px;padding:.2rem .35rem;font-size:.69rem" value="${ci.desc||''}" oninput="editCustom(${i},'desc',this.value)"></td>
-    <td><input type="number" style="width:68px;border:1px solid var(--border);border-radius:4px;padding:.2rem .35rem;font-size:.69rem;text-align:center" value="${ci.hw||0}" oninput="editCustom(${i},'hw',+this.value)"></td>
-    <td><input type="number" style="width:68px;border:1px solid var(--border);border-radius:4px;padding:.2rem .35rem;font-size:.69rem;text-align:center" value="${ci.inst||0}" oninput="editCustom(${i},'inst',+this.value)"></td>
-    <td><select style="border:1px solid var(--border);border-radius:4px;padding:.2rem .3rem;font-size:.69rem" onchange="editCustom(${i},'cat',this.value)">
+  <table class="pt"><thead><tr><th>Nazwa</th><th>Opis</th><th>Sprzęt netto</th><th>Montaż netto</th><th>Kategoria</th><th></th></tr></thead>
+  <tbody>${customItems.map((ci,i)=>`<tr>
+    <td><input style="width:125px;border:1px solid var(--border);border-radius:4px;padding:.2rem .3rem;font-size:.68rem" value="${ci.name||''}" oninput="editCustom(${i},'name',this.value)"></td>
+    <td><input style="width:165px;border:1px solid var(--border);border-radius:4px;padding:.2rem .3rem;font-size:.68rem" value="${ci.desc||''}" oninput="editCustom(${i},'desc',this.value)"></td>
+    <td><input type="number" style="width:66px;border:1px solid var(--border);border-radius:4px;padding:.2rem .3rem;font-size:.68rem;text-align:center" value="${ci.hw||0}" oninput="editCustom(${i},'hw',+this.value)"></td>
+    <td><input type="number" style="width:66px;border:1px solid var(--border);border-radius:4px;padding:.2rem .3rem;font-size:.68rem;text-align:center" value="${ci.inst||0}" oninput="editCustom(${i},'inst',+this.value)"></td>
+    <td><select style="border:1px solid var(--border);border-radius:4px;padding:.2rem .28rem;font-size:.68rem" onchange="editCustom(${i},'cat',this.value)">
       ${['gps','immo','alarm','full','all'].map(c=>`<option ${ci.cat===c?'selected':''}>${c}</option>`).join('')}
     </select></td>
-    <td><button onclick="delCustom(${i})" style="background:none;border:1px solid var(--rbr);color:var(--red);border-radius:4px;padding:.15rem .35rem;font-size:.67rem;cursor:pointer">✕</button></td>
-  </tr>`).join('')}
-  </tbody></table>
-  <button class="abtn abtn-grey" style="margin-top:.4rem" onclick="addCustom()">+ Dodaj pozycję</button>`;
+    <td><button onclick="delCustom(${i})" style="background:none;border:1px solid #FECACA;color:var(--red);border-radius:4px;padding:.14rem .32rem;font-size:.66rem;cursor:pointer">✕</button></td>
+  </tr>`).join('')}</tbody></table>
+  <button class="abtn abtn-grey" style="margin-top:.38rem" onclick="addCustom()">+ Dodaj pozycję</button>`;
 
-  // Leads
-  try{
-    const leads=JSON.parse(localStorage.getItem('evt_leads_v8')||'[]');
-    if(leads.length>0){
-      html+=`<div class="adm-sec">📞 Zapytania (${leads.length})</div>
-      <table class="pt"><thead><tr><th>Data</th><th>Klient</th><th>Tel</th><th>Miasto</th><th>Poj.</th><th>Kwota netto</th><th>VAT 23%</th><th>Pakiet</th></tr></thead><tbody>`;
-      leads.slice(-30).reverse().forEach(l=>{
-        const brutto = l.total?Math.round(l.total*1.23):0;
-        html+=`<tr><td>${new Date(l.ts).toLocaleDateString('pl-PL')}</td><td>${l.fn||''} ${l.ln||''}</td>
-        <td><a href="tel:${l.ph}">${l.ph||''}</a></td><td>${l.ci||''}</td><td>${l.vc||1}</td>
-        <td style="font-weight:600;color:var(--green)">${l.total?Math.round(l.total).toLocaleString('pl-PL')+' zł':'—'}</td>
-        <td style="color:var(--muted)">${brutto?brutto.toLocaleString('pl-PL')+' zł':'—'}</td>
-        <td>${l.pkg||''}</td></tr>`;
+  // ── Leads ─────────────────────────────────────────────────
+  try {
+    const leads = JSON.parse(localStorage.getItem('evt_leads_v8')||'[]');
+    if(leads.length > 0) {
+      html += `<div class="adm-sec">📞 Zapytania (${leads.length})
+        <span style="float:right;display:flex;gap:.35rem">
+          <button onclick="exportLeadsCSV()" style="background:var(--green);color:#fff;border:none;border-radius:5px;padding:.22rem .6rem;font-size:.67rem;font-family:'Syne',sans-serif;font-weight:700;cursor:pointer">⬇ CSV</button>
+          <button onclick="exportLeadsPrint()" style="background:var(--blue);color:#fff;border:none;border-radius:5px;padding:.22rem .6rem;font-size:.67rem;font-family:'Syne',sans-serif;font-weight:700;cursor:pointer">🖨 Drukuj</button>
+          <button onclick="if(confirm('Wyczyścić wszystkie leady?')){localStorage.removeItem(\'evt_leads_v8\');renderAdmin()}" style="background:#fff;color:var(--red);border:1px solid #FECACA;border-radius:5px;padding:.22rem .6rem;font-size:.67rem;font-family:'Syne',sans-serif;font-weight:700;cursor:pointer">🗑 Wyczyść</button>
+        </span>
+      </div>
+      <table class="pt"><thead><tr><th>Data</th><th>Klient</th><th>Tel</th><th>Email</th><th>Firma</th><th>Miasto</th><th>Poj.</th><th>Kwota netto</th><th>Brutto +23%</th><th>Pakiet</th><th>Akcja</th></tr></thead><tbody>`;
+      leads.slice(-30).reverse().forEach(l => {
+        const brutto = l.total ? Math.round(l.total*1.23) : 0;
+        html += `<tr>
+          <td>${new Date(l.ts).toLocaleDateString('pl-PL')}<br><span style="font-size:.6rem;color:var(--muted)">${new Date(l.ts).toLocaleTimeString('pl-PL',{hour:'2-digit',minute:'2-digit'})}</span></td>
+          <td style="font-weight:500">${l.fn||''} ${l.ln||''}</td>
+          <td><a href="tel:${l.ph}" style="color:var(--blue)">${l.ph||''}</a></td>
+          <td><a href="mailto:${l.em||''}" style="color:var(--blue);font-size:.67rem">${l.em||'—'}</a></td>
+          <td style="font-size:.67rem">${l.co||'—'}</td>
+          <td>${l.ci||''}</td>
+          <td style="text-align:center">${l.vc||1}</td>
+          <td style="font-weight:600;color:var(--green)">${l.total?Math.round(l.total).toLocaleString('pl-PL')+' zł':'—'}</td>
+          <td style="color:var(--muted)">${brutto?brutto.toLocaleString('pl-PL')+' zł':'—'}</td>
+          <td><span style="background:#EFF6FF;color:var(--blue);border-radius:4px;padding:.1rem .3rem;font-size:.63rem;white-space:nowrap">${l.pkg||'—'}</span></td>
+          <td><button onclick="downloadSingleLead(${leads.length-leads.slice(-30).reverse().indexOf(l)-1})" style="background:none;border:1px solid var(--border);border-radius:4px;padding:.15rem .38rem;font-size:.63rem;cursor:pointer;color:var(--blue)" title="Pobierz wycenę">⬇</button></td>
+        </tr>`;
       });
-      html+='</tbody></table>';
+      html += '</tbody></table>';
     }
-  }catch(e){}
+  } catch(e) {}
 
-  // Formspree endpoint setting
-  const fs = localStorage.getItem('evt_formspree')||'';
-  html += `<div class="adm-sec">📨 Formspree – automatyczne powiadomienia e-mail</div>
-  <div style="background:#EFF6FF;border:1px solid #BFDBFE;border-radius:var(--rs);padding:.75rem;margin-bottom:.6rem">
-    <div style="font-size:.73rem;font-weight:600;color:var(--blue);margin-bottom:.35rem">Endpoint Formspree (po rejestracji na formspree.io)</div>
-    <div style="display:flex;gap:.4rem;flex-wrap:wrap;align-items:center">
-      <input type="text" id="fs-endpoint" value="${fs}" placeholder="https://formspree.io/f/xabcdefg"
-        style="flex:1;min-width:220px;border:1.5px solid var(--border);border-radius:var(--rs);padding:.38rem .6rem;font-size:.79rem">
-      <button class="abtn abtn-pri" onclick="saveFormspree()" style="padding:.38rem .85rem;font-size:.74rem">Zapisz endpoint</button>
-      ${fs?'<span style="color:var(--green);font-size:.7rem;font-weight:600">✓ Skonfigurowane</span>':'<span style="color:var(--amber);font-size:.7rem">⚠ Nie skonfigurowane</span>'}
-    </div>
-    <div style="font-size:.67rem;color:var(--muted);margin-top:.35rem;line-height:1.6">
-      1. Zarejestruj się na <strong>formspree.io</strong> (darmowe do 50 leadów/mies.)<br>
-      2. Utwórz nowy formularz → skopiuj endpoint<br>
-      3. Wklej powyżej i kliknij Zapisz<br>
-      Po zapisaniu każde wysłanie wyceny przez klienta trafi automatycznie na Twój e-mail.
-    </div>
+  html += `<div class="adm-acts">
+    <button class="abtn abtn-pri" onclick="saveAllPrices()">💾 Zapisz wszystkie ceny</button>
+    <button class="abtn abtn-del" onclick="if(confirm('Przywrócić domyślne?'))resetP()">↩ Domyślne</button>
+    <button class="abtn abtn-grey" onclick="if(confirm('Wyczyścić leady?')){localStorage.removeItem('evt_leads_v8');renderAdmin()}">🗑 Leady</button>
+    <button class="abtn abtn-grey" onclick="saveCustomItems()">💾 Własne pozycje</button>
   </div>`;
 
-  html+=`<div class="adm-acts">
-    <button class="abtn abtn-pri" onclick="saveP()">💾 Zapisz ceny</button>
-    <button class="abtn abtn-del" onclick="if(confirm('Przywrócić domyślne ceny?'))resetP()">↩ Przywróć domyślne</button>
-    <button class="abtn abtn-grey" onclick="if(confirm('Wyczyścić leady?')){localStorage.removeItem('evt_leads_v8');renderAdmin()}">🗑 Wyczyść leady</button>
-    <button class="abtn abtn-grey" onclick="saveCustomItems()">💾 Zapisz własne pozycje</button>
-  </div>`;
-
-  document.getElementById('adm-content').innerHTML=html;
+  document.getElementById('adm-content').innerHTML = html;
 }
+
+// ── Helper: calculate buy price in PLN ────────────────────
+function calcBuyPln(cur, amt, eur, gbp) {
+  if(!amt || amt<=0) return 0;
+  if(cur==='EUR') return Math.round(amt * eur * 100)/100;
+  if(cur==='GBP') return Math.round(amt * gbp * 100)/100;
+  return amt; // PLN
+}
+
+// ── Live currency conversions ─────────────────────────────
+function liveConvert() {
+  const eur = parseFloat(document.getElementById('eur-rate')?.value||'4.25');
+  const gbp = parseFloat(document.getElementById('gbp-rate')?.value||'5.10');
+  const ep = document.getElementById('eur-preview');
+  if(ep) ep.innerHTML = `FTC880: ~${Math.round(46*eur)} zł &nbsp;·&nbsp; FTC305: ~${Math.round(69*eur)} zł<br>SIM 500MB: ~${Math.round(11*eur)} zł &nbsp;·&nbsp; Relay: ~${Math.round(2.5*eur)} zł`;
+  const gp = document.getElementById('gbp-preview');
+  if(gp) gp.innerHTML = `100 GBP = ${Math.round(100*gbp)} zł &nbsp;·&nbsp; 500 GBP = ${Math.round(500*gbp)} zł`;
+  // Refresh all PLN displays
+  document.querySelectorAll('[id^="pln-"]').forEach(el => {
+    const k = el.id.replace('pln-','');
+    const cur = document.getElementById('cur-'+k)?.value||'PLN';
+    const amt = parseFloat(document.getElementById('amt-'+k)?.value||'0');
+    const pln = calcBuyPln(cur, amt, eur, gbp);
+    el.textContent = pln>0 ? pln.toLocaleString('pl-PL')+' zł' : '—';
+    refreshRow(k, pln);
+  });
+}
+
+// ── When currency dropdown changes ────────────────────────
+function onCurChange(k) {
+  localStorage.setItem('evt_cur_'+k, document.getElementById('cur-'+k)?.value||'PLN');
+  recalcRow(k);
+}
+
+// ── When buy amount changes ───────────────────────────────
+function onAmtChange(k) {
+  const amt = parseFloat(document.getElementById('amt-'+k)?.value||'0');
+  localStorage.setItem('evt_amt_'+k, amt);
+  recalcRow(k);
+}
+
+// ── When sell price changes ───────────────────────────────
+function onSellChange(k) {
+  const cl = parseFloat(document.getElementById('ap-'+k)?.value||'0');
+  const eur = parseFloat(localStorage.getItem('evt_eur_rate')||'4.25');
+  const gbp = parseFloat(localStorage.getItem('evt_gbp_rate')||'5.10');
+  const cur = document.getElementById('cur-'+k)?.value||'PLN';
+  const amt = parseFloat(document.getElementById('amt-'+k)?.value||'0');
+  const buyPln = calcBuyPln(cur, amt, eur, gbp);
+  const mp = cl>0&&buyPln>0 ? Math.round((cl-buyPln)/cl*100) : cl>0?100:0;
+  const mpInp = document.getElementById('mp-inp-'+k);
+  if(mpInp) mpInp.value = mp;
+  refreshRow(k, buyPln);
+}
+
+// ── When margin % changes manually ───────────────────────
+function onMarginChange(k) {
+  const mp = parseFloat(document.getElementById('mp-inp-'+k)?.value||'0');
+  const eur = parseFloat(localStorage.getItem('evt_eur_rate')||'4.25');
+  const gbp = parseFloat(localStorage.getItem('evt_gbp_rate')||'5.10');
+  const cur = document.getElementById('cur-'+k)?.value||'PLN';
+  const amt = parseFloat(document.getElementById('amt-'+k)?.value||'0');
+  const buyPln = calcBuyPln(cur, amt, eur, gbp);
+  // Calculate sell price from margin: sell = buy / (1 - margin/100)
+  if(buyPln>0 && mp<100) {
+    const newSell = Math.round(buyPln / (1 - mp/100));
+    const apEl = document.getElementById('ap-'+k);
+    if(apEl) apEl.value = newSell;
+  }
+  recalcRow(k);
+}
+
+function recalcRow(k) {
+  const eur = parseFloat(document.getElementById('eur-rate')?.value || localStorage.getItem('evt_eur_rate')||'4.25');
+  const gbp = parseFloat(document.getElementById('gbp-rate')?.value || localStorage.getItem('evt_gbp_rate')||'5.10');
+  const cur = document.getElementById('cur-'+k)?.value||'PLN';
+  const amt = parseFloat(document.getElementById('amt-'+k)?.value||'0');
+  const buyPln = calcBuyPln(cur, amt, eur, gbp);
+  const plnEl = document.getElementById('pln-'+k);
+  if(plnEl) plnEl.textContent = buyPln>0 ? buyPln.toLocaleString('pl-PL')+' zł' : '—';
+  refreshRow(k, buyPln);
+}
+
+function refreshRow(k, buyPln) {
+  const cl  = parseFloat(document.getElementById('ap-'+k)?.value||'0');
+  const mp  = cl>0&&buyPln>0 ? Math.round((cl-buyPln)/cl*100) : cl>0?100:0;
+  const mz  = cl>0 ? Math.round(cl-buyPln) : 0;
+  const col = mp>=60?'var(--green)':mp>=35?'var(--amber)':buyPln>0?'var(--red)':'var(--muted)';
+  const mpDisp = document.getElementById('mp-'+k);
+  const mzDisp = document.getElementById('mz-'+k);
+  const earn   = document.getElementById('earn-'+k);
+  if(mpDisp){mpDisp.textContent=mp>0?mp+'%':'—';mpDisp.style.color=col;}
+  if(mzDisp){mzDisp.textContent=mz>0?'+'+mz.toLocaleString('pl-PL')+' zł':'—';mzDisp.style.color=col;}
+  if(earn)  {earn.textContent=mz>0?mz.toLocaleString('pl-PL')+' zł':'—';}
+  // Sync margin input
+  const mpInp = document.getElementById('mp-inp-'+k);
+  if(mpInp && document.activeElement !== mpInp) mpInp.value = mp;
+}
+
+function saveGbpRate() {
+  const r = parseFloat(document.getElementById('gbp-rate')?.value||'5.10');
+  localStorage.setItem('evt_gbp_rate', r.toFixed(4));
+  alert('Kurs GBP zapisany: '+r.toFixed(4)+' PLN');
+}
+
+function saveAllPrices() {
+  // Collect all ap- inputs
+  const n = {};
+  Object.keys(DEF).forEach(k => {
+    const el = document.getElementById('ap-'+k);
+    if(el) n[k] = parseFloat(el.value)||0;
+  });
+  P = Object.assign({}, n);
+  localStorage.setItem('evt_p_v8', JSON.stringify(P));
+  // Save currencies and amounts
+  document.querySelectorAll('[id^="cur-"]').forEach(el => {
+    const k = el.id.replace('cur-','');
+    localStorage.setItem('evt_cur_'+k, el.value);
+  });
+  document.querySelectorAll('[id^="amt-"]').forEach(el => {
+    const k = el.id.replace('amt-','');
+    if(el.value) localStorage.setItem('evt_amt_'+k, el.value);
+  });
+  alert('✓ Wszystkie ceny zapisane!');
+}
+
 
 function previewEur(rate) {
-  const r=parseFloat(rate)||4.25;
-  const el=document.getElementById('eur-preview');
-  if(el) el.innerHTML=`FTC880: ${Math.round(46*r)} zł · FTC305 CAN: ${Math.round(69*r)} zł · FTC881: ${Math.round(47*r)} zł<br>SIM 500MB/rok: ${Math.round(11*r)} zł · Relay 12V: ${Math.round(2.5*r)} zł`;
+  const r = parseFloat(rate)||4.25;
+  const ep = document.getElementById('eur-preview');
+  if(ep) ep.innerHTML = `FTC880: ~${Math.round(46*r)} zł · FTC305: ~${Math.round(69*r)} zł<br>SIM 500MB: ~${Math.round(11*r)} zł · Relay: ~${Math.round(2.5*r)} zł`;
 }
+
 
 
 function saveFormspree(){
@@ -2105,7 +2328,7 @@ function saveFormspree(){
 function saveEurRate(){
   const r=parseFloat(document.getElementById('eur-rate')?.value||'4.25');
   const d=new Date().toLocaleDateString('pl-PL');
-  localStorage.setItem('evt_eur_rate',r.toFixed(2));
+  localStorage.setItem('evt_eur_rate',r.toFixed(4));
   localStorage.setItem('evt_eur_date',d);
   alert('Kurs EUR zapisany: '+r.toFixed(2)+' PLN ('+d+')');
   renderAdmin();
@@ -2127,6 +2350,120 @@ function recM(k,buy){
   const me=document.getElementById('mp-'+k);if(me){me.textContent=mp>0?mp+'%':'—';me.style.color=col;}
   const mze=document.getElementById('mz-'+k);if(mze){mze.textContent=mz>0?'+'+mz+' zł':'—';mze.style.color=col;}
 }
+
+function exportLeadsCSV() {
+  try {
+    const leads = JSON.parse(localStorage.getItem('evt_leads_v8')||'[]');
+    if(!leads.length){alert('Brak zapytań.');return;}
+    const BOM = '\uFEFF';
+    const headers = ['Data','Godzina','Imie','Nazwisko','Telefon','Email','Firma','Miejscowosc','Pojazdy','Pakiet','Kwota netto zl','Brutto +23% zl'];
+    const rows = leads.map(l=>{
+      const d=new Date(l.ts);
+      return [
+        d.toLocaleDateString('pl-PL'),
+        d.toLocaleTimeString('pl-PL',{hour:'2-digit',minute:'2-digit'}),
+        l.fn||'',l.ln||'',l.ph||'',l.em||'',l.co||'',l.ci||'',
+        l.vc||1,l.pkg||'',
+        l.total?Math.round(l.total):'',
+        l.total?Math.round(l.total*1.23):'',
+      ].map(v=>'"'+String(v).replace(/"/g,'""')+'"').join(';');
+    });
+    const csv = BOM + headers.map(h=>'"'+h+'"').join(';') + '\n' + rows.join('\n');
+    const blob = new Blob([csv],{type:'text/csv;charset=utf-8'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href=url; a.download='EVTelematix_zapytania_'+new Date().toISOString().slice(0,10)+'.csv';
+    a.click(); URL.revokeObjectURL(url);
+  } catch(e){alert('Blad: '+e.message);}
+}
+
+function exportLeadsPrint() {
+  try {
+    const leads = JSON.parse(localStorage.getItem('evt_leads_v8')||'[]');
+    if(!leads.length){alert('Brak zapytan.');return;}
+    const rows = leads.slice().reverse().map((l,i)=>{
+      const d=new Date(l.ts); const brutto=l.total?Math.round(l.total*1.23):0;
+      return '<tr style="background:'+(i%2===0?'#F9FAFB':'#fff')+'">'+
+        '<td>'+d.toLocaleDateString('pl-PL')+' '+d.toLocaleTimeString('pl-PL',{hour:'2-digit',minute:'2-digit'})+'</td>'+
+        '<td><strong>'+(l.fn||'')+' '+(l.ln||'')+'</strong></td>'+
+        '<td>'+(l.ph||'')+'</td><td>'+(l.em||'-')+'</td>'+
+        '<td>'+(l.co||'-')+'</td><td>'+(l.ci||'')+'</td>'+
+        '<td style="text-align:center">'+(l.vc||1)+'</td>'+
+        '<td>'+(l.pkg||'-')+'</td>'+
+        '<td style="text-align:right;font-weight:600;color:#0F6B30">'+(l.total?Math.round(l.total).toLocaleString('pl-PL')+' zl':'-')+'</td>'+
+        '<td style="text-align:right;color:#6B7280">'+(brutto?brutto.toLocaleString('pl-PL')+' zl':'-')+'</td></tr>';
+    }).join('');
+    const html = '<!DOCTYPE html><html lang="pl"><head><meta charset="UTF-8">'+
+      '<title>EVTelematix Zapytania</title>'+
+      '<style>body{font-family:Arial,sans-serif;font-size:9.5pt;margin:10mm}'+
+      'h1{font-size:12pt;margin-bottom:3px}'+
+      'table{width:100%;border-collapse:collapse;font-size:8.5pt}'+
+      'th{background:#07131F;color:#fff;padding:5px 7px;text-align:left}'+
+      'td{padding:4px 7px;border-bottom:1px solid #E5E7EB}'+
+      '@media print{@page{size:A4 landscape;margin:8mm}}</style></head><body>'+
+      '<h1>EVTelematix - Lista zapytan ('+leads.length+')</h1>'+
+      '<p style="font-size:8pt;color:#6B7280">Wygenerowano: '+new Date().toLocaleDateString('pl-PL')+'</p>'+
+      '<table><thead><tr><th>Data</th><th>Klient</th><th>Tel</th><th>Email</th>'+
+      '<th>Firma</th><th>Miasto</th><th>Poj.</th><th>Pakiet</th>'+
+      '<th style="text-align:right">Netto</th><th style="text-align:right">Brutto</th></tr></thead>'+
+      '<tbody>'+rows+'</tbody></table>'+
+      '<p style="font-size:7.5pt;color:#9CA3AF;margin-top:10px">EVTelematix +48 516 956 809 info@evtelematix.com evtelematix.pl</p>'+
+      '</body></html>';
+    const w = window.open('','_blank','width=1100,height=750');
+    w.document.write(html); w.document.close(); w.focus();
+    setTimeout(()=>w.print(),400);
+  } catch(e){alert('Blad: '+e.message);}
+}
+
+function downloadSingleLead(idx) {
+  try {
+    const leads = JSON.parse(localStorage.getItem('evt_leads_v8')||'[]');
+    const l = leads[idx];
+    if(!l){alert('Nie znaleziono.');return;}
+    const d = new Date(l.ts);
+    const brutto = l.total?Math.round(l.total*1.23):0;
+    const html = '<!DOCTYPE html><html lang="pl"><head><meta charset="UTF-8">'+
+      '<title>Wycena EVTelematix</title>'+
+      '<style>body{font-family:Arial,sans-serif;font-size:10.5pt;margin:18mm;max-width:160mm}'+
+      '.logo{font-size:14pt;font-weight:700;color:#07131F}.logo b{color:#C8850A}'+
+      '.hdr{border-bottom:2px solid #07131F;padding-bottom:8px;margin-bottom:14px;display:flex;justify-content:space-between}'+
+      '.c{font-size:8.5pt;color:#6B7280;text-align:right;line-height:1.6}'+
+      'h2{font-size:10.5pt;color:#07131F;margin:12px 0 7px;border-left:3px solid #1A56CC;padding-left:7px}'+
+      '.row{font-size:9.5pt;padding:4px 0;border-bottom:1px dotted #E5E7EB;display:flex;gap:10px}'+
+      '.lbl{color:#6B7280;min-width:130px}.val{font-weight:500}'+
+      '.totbox{background:#07131F;color:#fff;padding:10px 14px;border-radius:6px;margin:14px 0;display:flex;justify-content:space-between;align-items:center}'+
+      '.tot{font-size:16pt;font-weight:700;color:#C8850A}'+
+      '.note{font-size:7.5pt;color:#9CA3AF;margin-top:12px;line-height:1.6}'+
+      '@media print{@page{size:A4;margin:14mm}}</style></head><body>'+
+      '<div class="hdr"><div><div class="logo">EV<b>Telematix</b></div>'+
+      '<div style="font-size:8pt;color:#6B7280">Zabezpieczenia elektroniczne vanow i kamperow</div></div>'+
+      '<div class="c">+48 516 956 809<br>info@evtelematix.com<br>evtelematix.pl</div></div>'+
+      '<h2>Dane klienta</h2>'+
+      '<div class="row"><span class="lbl">Imie i nazwisko</span><span class="val">'+(l.fn||'')+' '+(l.ln||'')+'</span></div>'+
+      '<div class="row"><span class="lbl">Telefon</span><span class="val">'+(l.ph||'-')+'</span></div>'+
+      '<div class="row"><span class="lbl">E-mail</span><span class="val">'+(l.em||'-')+'</span></div>'+
+      '<div class="row"><span class="lbl">Miejscowosc</span><span class="val">'+(l.ci||'-')+'</span></div>'+
+      (l.co?'<div class="row"><span class="lbl">Firma</span><span class="val">'+l.co+'</span></div>':'')+
+      '<div class="row"><span class="lbl">Liczba pojazdow</span><span class="val">'+(l.vc||1)+' szt.</span></div>'+
+      '<h2>Konfiguracja</h2>'+
+      '<div class="row"><span class="lbl">Pakiet</span><span class="val">'+(l.pkg||'-')+'</span></div>'+
+      '<div class="row"><span class="lbl">Data zapytania</span><span class="val">'+d.toLocaleDateString('pl-PL')+' '+d.toLocaleTimeString('pl-PL',{hour:'2-digit',minute:'2-digit'})+'</span></div>'+
+      '<div class="totbox"><div>'+
+        '<div style="font-size:8pt;color:#94A3B8;text-transform:uppercase">Razem jednorazowo</div>'+
+        '<div class="tot">'+(l.total?Math.round(l.total).toLocaleString('pl-PL')+' zl':'-')+
+        ' <span style="font-size:9pt;color:#94A3B8">netto</span></div>'+
+        '<div style="font-size:9pt;color:#94A3B8">'+(brutto?brutto.toLocaleString('pl-PL')+' zl brutto (+23% VAT)':'-')+'</div>'+
+      '</div><div style="text-align:right;font-size:8pt;color:#94A3B8">Ceny netto PLN<br>Wycena orientacyjna<br>Wazna 30 dni</div></div>'+
+      '<div class="note">* Wycena orientacyjna – finalna cena po bezplatnej diagnozie pojazdu.<br>'+
+      '* Pomagamy w uzyskaniu znizki OC/AC do 30% (zalezne od ubezpieczyciela).<br>'+
+      '* Montaz na terenie calej Polski.</div>'+
+      '</body></html>';
+    const w = window.open('','_blank','width=800,height=900');
+    w.document.write(html); w.document.close(); w.focus();
+    setTimeout(()=>w.print(),500);
+  } catch(e){alert('Blad: '+e.message);}
+}
+
 function saveP(){
   const n={};Object.keys(DEF).forEach(k=>{const el=document.getElementById('ap-'+k);if(el)n[k]=parseFloat(el.value)||0;});
   P=Object.assign({},n);localStorage.setItem('evt_p_v8',JSON.stringify(P));alert('Ceny zapisane!');
